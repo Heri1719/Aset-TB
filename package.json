@@ -1,0 +1,16 @@
+{
+  "name": "aset-tb",
+  "version": "1.0.0",
+  "description": "ASET-TB web-mobile app with a lightweight Node.js backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "db:migrate": "psql \"$DATABASE_URL\" -f db/schema.sql",
+    "email:test": "node scripts/test-email.js"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
+  },
+  "private": true
+}

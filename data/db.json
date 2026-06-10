@@ -1,0 +1,229 @@
+{
+  "users": [
+    {
+      "id": "patient-001",
+      "role": "patient",
+      "name": "Bapak Ahmad Santoso",
+      "email": "ahmad@example.com",
+      "googleId": "demo-google-ahmad",
+      "avatar": "https://lh3.googleusercontent.com/aida-public/AB6AXuCX7SqghtUdM2EF8VNZkKllrSZeVPL1arAB5bc-I12V9bDcAa5NyArBsh2u_M9wofmgnFixSwqtnlQTLX8CBz7Biq3PXHtEpbrcz8rps8XP4jiOE1smZjTFWq627HdO4hQ9y_tbWdP3ZGGxzE_McNu_TeybVRBd2YVHX9N4scYE3IQ8I0gtla6k1l1q97chEffVeKpqPHM2Hq4Zoy5PuSYfMM4rlJgqWOWtCtK5eadkwbZr8xSWrvX5VlEjgDBrd4qguyBvIgixHqsZ"
+    },
+    {
+      "id": "nurse-001",
+      "role": "nurse",
+      "name": "Ns. Heri Nur Cahyanto",
+      "email": "hcahyanto@ikbis.ac.id",
+      "passwordHash": "demo-only"
+    }
+  ],
+  "patients": [
+    {
+      "id": "patient-001",
+      "medicalRecordNumber": "TB-2024-001",
+      "name": "Bapak Ahmad Santoso",
+      "phase": "Intensif",
+      "treatmentDay": 45,
+      "treatmentTargetDays": 180,
+      "adherenceScore": 92,
+      "selfEfficacyScore": 86,
+      "riskLevel": "low",
+      "nurseId": "nurse-001",
+      "googleEmail": "ahmad@example.com",
+      "status": "active"
+    },
+    {
+      "id": "patient-002",
+      "medicalRecordNumber": "TB-2024-002",
+      "name": "Ibu Rina Wijaya",
+      "phase": "Lanjutan",
+      "treatmentDay": 102,
+      "treatmentTargetDays": 180,
+      "adherenceScore": 78,
+      "selfEfficacyScore": 74,
+      "riskLevel": "medium",
+      "nurseId": "nurse-001",
+      "googleEmail": "rina@example.com",
+      "status": "active"
+    },
+    {
+      "id": "patient-003",
+      "medicalRecordNumber": "TB-2024-003",
+      "name": "Sdr. Dimas Pratama",
+      "phase": "Intensif",
+      "treatmentDay": 23,
+      "treatmentTargetDays": 180,
+      "adherenceScore": 64,
+      "selfEfficacyScore": 68,
+      "riskLevel": "high",
+      "nurseId": "nurse-001",
+      "googleEmail": "",
+      "status": "active"
+    }
+  ],
+  "medications": [
+    {
+      "id": "med-001",
+      "patientId": "patient-001",
+      "name": "Rifampicin",
+      "dose": "450mg",
+      "form": "1 Kapsul",
+      "scheduledTime": "07:00",
+      "status": "taken",
+      "confirmedAt": "07:05",
+      "takenDate": "2026-05-23"
+    },
+    {
+      "id": "med-002",
+      "patientId": "patient-001",
+      "name": "Isoniazid",
+      "dose": "300mg",
+      "form": "1 Tablet",
+      "scheduledTime": "13:00",
+      "status": "pending",
+      "confirmedAt": null,
+      "takenDate": "2026-05-23"
+    },
+    {
+      "id": "med-003",
+      "patientId": "patient-001",
+      "name": "Ethambutol",
+      "dose": "750mg",
+      "form": "2 Tablet",
+      "scheduledTime": "20:00",
+      "status": "upcoming",
+      "confirmedAt": null,
+      "takenDate": "2026-05-23"
+    }
+  ],
+  "education": [
+    {
+      "id": "edu-001",
+      "title": "Mengapa obat TB harus diminum teratur?",
+      "category": "Kepatuhan",
+      "summary": "Pengobatan teratur membantu membunuh kuman TB sepenuhnya dan mencegah resistensi obat."
+    },
+    {
+      "id": "edu-002",
+      "title": "Efek samping yang perlu diwaspadai",
+      "category": "Keamanan",
+      "summary": "Segera hubungi tenaga kesehatan bila muncul mata kuning, muntah berat, sesak, ruam luas, atau lemas berat."
+    }
+  ],
+  "motivations": [
+    {
+      "id": "mot-001",
+      "message": "Setiap obat yang diminum hari ini adalah langkah menuju kesembuhan."
+    },
+    {
+      "id": "mot-002",
+      "message": "Konsistensi kecil setiap hari bisa membawa perubahan besar untuk kesehatan Anda."
+    }
+  ],
+  "chatMessages": [
+    {
+      "id": "chat-001",
+      "patientId": "patient-001",
+      "sender": "assistant",
+      "message": "Halo! Saya siap membantu Anda hari ini. Ada yang ingin Anda tanyakan seputar perawatan TB Anda?",
+      "createdAt": "2026-05-23T09:00:00.000+07:00",
+      "topic": "general"
+    },
+    {
+      "id": "chat-002",
+      "patientId": "patient-001",
+      "sender": "user",
+      "message": "Terima kasih. Saya merasa sedikit mual hari ini.",
+      "createdAt": "2026-05-23T09:01:00.000+07:00",
+      "topic": "side_effect"
+    },
+    {
+      "id": "chat-003",
+      "patientId": "patient-001",
+      "sender": "assistant",
+      "message": "Mual ringan terkadang bisa terjadi di awal pengobatan. Cobalah minum obat setelah makan ringan. Jika mual menetap, muntah berat, mata kuning, atau tubuh sangat lemas, segera hubungi klinik.",
+      "createdAt": "2026-05-23T09:02:00.000+07:00",
+      "topic": "side_effect"
+    },
+    {
+      "id": "99fc8463-449a-44bf-8d3c-89f81aa3ff05",
+      "patientId": "patient-001",
+      "sender": "user",
+      "message": "tes",
+      "createdAt": "2026-05-23T02:37:29.871Z",
+      "topic": "general"
+    },
+    {
+      "id": "32f6a21d-ba7c-4c65-82dd-27a187f8c066",
+      "patientId": "patient-001",
+      "sender": "assistant",
+      "message": "Saya bisa membantu menjelaskan informasi umum tentang TB, jadwal obat, kepatuhan, efek samping ringan, dan motivasi. Untuk keluhan berat atau keputusan pengobatan, tetap hubungi perawat atau dokter.",
+      "createdAt": "2026-05-23T02:37:30.871Z",
+      "topic": "education"
+    },
+    {
+      "id": "9c84cc0d-4e4b-4ed8-bfcf-6787caebc81b",
+      "patientId": "patient-001",
+      "sender": "user",
+      "message": "Apa yang dilakukan kalau lupa minum obat?",
+      "createdAt": "2026-05-23T02:37:34.321Z",
+      "topic": "general"
+    },
+    {
+      "id": "c3c260ac-2db5-463e-9b19-857e89c4211f",
+      "patientId": "patient-001",
+      "sender": "assistant",
+      "message": "Jika lupa minum obat, minum segera saat ingat bila waktunya belum terlalu dekat dengan jadwal berikutnya. Jangan menggandakan dosis. Catat kejadian ini dan hubungi perawat bila sering terulang.",
+      "createdAt": "2026-05-23T02:37:35.321Z",
+      "topic": "missed_dose"
+    },
+    {
+      "id": "91d95cad-e905-47c4-88c8-f0bda55412e7",
+      "patientId": "patient-001",
+      "sender": "user",
+      "message": "Kenapa saya harus minum obat setiap hari?",
+      "createdAt": "2026-05-23T02:37:58.666Z",
+      "topic": "general"
+    },
+    {
+      "id": "55255dca-a441-4eec-9c1f-76702a9c2935",
+      "patientId": "patient-001",
+      "sender": "assistant",
+      "message": "Obat TB perlu diminum teratur agar kuman TB benar-benar hilang dan tidak menjadi kebal obat. Kepatuhan harian adalah bagian penting dari proses sembuh.",
+      "createdAt": "2026-05-23T02:37:59.666Z",
+      "topic": "adherence"
+    },
+    {
+      "id": "9791ea68-25cc-46aa-bdb0-9451a3f52cb3",
+      "patientId": "patient-001",
+      "sender": "user",
+      "message": "Apa yang dilakukan kalau lupa minum obat?",
+      "createdAt": "2026-05-23T02:38:13.247Z",
+      "topic": "general"
+    },
+    {
+      "id": "5fb3a1fd-513b-4d56-91d1-0b563a59d505",
+      "patientId": "patient-001",
+      "sender": "assistant",
+      "message": "Jika lupa minum obat, minum segera saat ingat bila waktunya belum terlalu dekat dengan jadwal berikutnya. Jangan menggandakan dosis. Catat kejadian ini dan hubungi perawat bila sering terulang.",
+      "createdAt": "2026-05-23T02:38:14.247Z",
+      "topic": "missed_dose"
+    },
+    {
+      "id": "64c51d62-be93-4476-9578-e50cc86cf4bd",
+      "patientId": "patient-001",
+      "sender": "user",
+      "message": "Kenapa saya harus minum obat setiap hari?",
+      "createdAt": "2026-05-23T02:38:15.314Z",
+      "topic": "general"
+    },
+    {
+      "id": "591ac9c3-d8fc-4221-a9cf-c6cefc4d160c",
+      "patientId": "patient-001",
+      "sender": "assistant",
+      "message": "Obat TB perlu diminum teratur agar kuman TB benar-benar hilang dan tidak menjadi kebal obat. Kepatuhan harian adalah bagian penting dari proses sembuh.",
+      "createdAt": "2026-05-23T02:38:16.314Z",
+      "topic": "adherence"
+    }
+  ],
+  "auditLogs": []
+}

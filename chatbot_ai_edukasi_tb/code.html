@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Atkinson+Hyperlegible+Next:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#717786",
+                    "surface-container-low": "#f1f3fe",
+                    "background": "#f9f9ff",
+                    "surface-variant": "#e0e2ed",
+                    "primary-container": "#0070ea",
+                    "secondary": "#006c4f",
+                    "primary": "#0059bb",
+                    "on-secondary-container": "#007354",
+                    "tertiary": "#9e3d00",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#67fcc6",
+                    "on-tertiary-fixed-variant": "#7c2e00",
+                    "outline-variant": "#c1c6d7",
+                    "on-primary-fixed-variant": "#004493",
+                    "surface-tint": "#005bc0",
+                    "surface-bright": "#f9f9ff",
+                    "primary-fixed": "#d8e2ff",
+                    "error-container": "#ffdad6",
+                    "on-secondary": "#ffffff",
+                    "tertiary-container": "#c64f00",
+                    "on-primary-fixed": "#001a41",
+                    "primary-fixed-dim": "#adc7ff",
+                    "surface": "#f9f9ff",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#2d3039",
+                    "on-secondary-fixed-variant": "#00513a",
+                    "on-surface-variant": "#414754",
+                    "surface-container-highest": "#e0e2ed",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed": "#ffdbcc",
+                    "on-secondary-fixed": "#002116",
+                    "surface-container-high": "#e6e8f3",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed-dim": "#ffb695",
+                    "on-tertiary-fixed": "#351000",
+                    "secondary-fixed-dim": "#44dfab",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#d7d9e5",
+                    "secondary-container": "#67fcc6",
+                    "on-primary-container": "#fefcff",
+                    "inverse-on-surface": "#eef0fb",
+                    "on-tertiary-container": "#fffbff",
+                    "on-background": "#181c23",
+                    "on-surface": "#181c23",
+                    "on-tertiary": "#ffffff",
+                    "inverse-primary": "#adc7ff",
+                    "surface-container": "#ebedf9"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sm": "12px",
+                    "lg": "40px",
+                    "xs": "4px",
+                    "md": "24px",
+                    "gutter": "16px",
+                    "base": "8px",
+                    "xl": "64px",
+                    "container-margin": "20px"
+            },
+            "fontFamily": {
+                    "headline-xl": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "headline-sm": ["Manrope"],
+                    "body-lg": ["Atkinson Hyperlegible Next"],
+                    "body-md": ["Atkinson Hyperlegible Next"],
+                    "label-md": ["Atkinson Hyperlegible Next"],
+                    "button-text": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-xl": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .chat-bubble-ai {
+            border-bottom-left-radius: 4px;
+        }
+        .chat-bubble-user {
+            border-bottom-right-radius: 4px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 flex justify-between items-center px-gutter h-16 w-full max-w-7xl mx-auto bg-surface-container-low shadow-sm">
+<div class="flex items-center gap-sm">
+<button class="p-2 rounded-full hover:bg-surface-variant/50 transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-primary">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">ASET-TB</h1>
+</div>
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden border-2 border-primary-container">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAr6rnShK0mqzkUlftOA3JBPf3-rxd3kRuxwsy2w5bSd5lcaYuPpKa2G_UpZo-LtwzoAlGeLltmXJg8j77NiyKjcGLD2wkNFkhj8_QfG_XBu2hlUjdygcrqUh-sG5Rm1rvUXvoRbKbF9HWfecj-J1xewWRPmr3C_Peu5Av8uiN7S1zXn_NGJp0jIx9c5UTorrxWnyCOwYYpk3d5A7VhSFOKDs0w3mWPEC5_WsXsAwFsgpgS9jANg-SieO17Fg5TMpK8QrG-l6Ya7yj3"/>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col w-full max-w-3xl mx-auto px-gutter py-md pb-72">
+<!-- AI Introduction Section -->
+<section class="flex flex-col items-center text-center mb-lg">
+<div class="w-20 h-20 bg-secondary-container text-on-secondary-container rounded-full flex items-center justify-center mb-sm shadow-lg">
+<span class="material-symbols-outlined text-[40px]" data-icon="smart_toy">smart_toy</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-xs">Asisten Kesehatan TB</h2>
+<p class="text-on-surface-variant font-body-md max-w-md">Saya di sini untuk mendukung perjalanan pengobatan Anda. Ajukan pertanyaan apa pun mengenai jadwal obat atau gejala.</p>
+</section>
+<!-- Chat Interaction History -->
+<div class="flex flex-col gap-md">
+<!-- AI Message -->
+<div class="flex gap-sm items-start max-w-[85%]">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px] text-on-secondary-container" data-icon="smart_toy">smart_toy</span>
+</div>
+<div class="bg-surface-container-high text-on-surface p-md rounded-2xl chat-bubble-ai shadow-sm">
+<p class="font-body-md">Halo! Saya siap membantu Anda hari ini. Ada yang ingin Anda tanyakan seputar perawatan TB Anda?</p>
+<span class="text-[10px] text-outline mt-1 block">09:00 AM</span>
+</div>
+</div>
+<!-- User Message -->
+<div class="flex gap-sm items-start self-end flex-row-reverse max-w-[85%]">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px] text-on-primary-container" data-icon="person">person</span>
+</div>
+<div class="bg-primary text-on-primary p-md rounded-2xl chat-bubble-user shadow-sm">
+<p class="font-body-md">Terima kasih. Saya merasa sedikit mual hari ini.</p>
+<span class="text-[10px] text-primary-fixed-dim mt-1 block text-right">09:01 AM</span>
+</div>
+</div>
+<!-- AI Response -->
+<div class="flex gap-sm items-start max-w-[85%]">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px] text-on-secondary-container" data-icon="smart_toy">smart_toy</span>
+</div>
+<div class="bg-surface-container-high text-on-surface p-md rounded-2xl chat-bubble-ai shadow-sm">
+<p class="font-body-md">Mual ringan terkadang bisa terjadi di awal pengobatan. Cobalah untuk minum obat setelah makan ringan. Namun, jika mual menetap atau disertai mata kuning, segera hubungi klinik ya.</p>
+<span class="text-[10px] text-outline mt-1 block">09:02 AM</span>
+</div>
+</div>
+</div>
+<!-- Suggested Questions / Chips -->
+<div class="mt-lg mb-44">
+<p class="font-label-md text-label-md text-on-surface-variant mb-sm px-1">Pertanyaan yang mungkin membantu:</p>
+<div class="flex flex-wrap gap-sm items-start">
+<button class="bg-surface-container-highest hover:bg-surface-variant text-on-surface-variant px-md py-sm rounded-full font-label-md transition-all border border-outline-variant/30 active:scale-95 max-w-full whitespace-normal text-left leading-snug">
+                    Apa yang dilakukan kalau lupa minum obat?
+                </button>
+<button class="bg-surface-container-highest hover:bg-surface-variant text-on-surface-variant px-md py-sm rounded-full font-label-md transition-all border border-outline-variant/30 active:scale-95 max-w-full whitespace-normal text-left leading-snug">
+                    Kenapa saya harus minum obat setiap hari?
+                </button>
+<button class="bg-surface-container-highest hover:bg-surface-variant text-on-surface-variant px-md py-sm rounded-full font-label-md transition-all border border-outline-variant/30 active:scale-95 max-w-full whitespace-normal text-left leading-snug">
+                    Apa saja efek samping yang normal?
+                </button>
+</div>
+</div>
+</main>
+<!-- Typing Area (Floating Bottom) -->
+<div class="fixed bottom-24 left-0 w-full px-gutter pb-3 bg-gradient-to-t from-background via-background to-transparent pt-6 z-40">
+<div class="max-w-3xl mx-auto bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-2 flex items-center gap-sm shadow-xl min-h-[64px]">
+<button class="p-3 text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<textarea class="flex-1 border-none focus:ring-0 bg-transparent py-3 resize-none max-h-32 font-body-md text-on-surface" placeholder="Ketik pesan Anda di sini..." rows="1"></textarea>
+<button class="bg-primary hover:bg-primary-container text-on-primary w-12 h-12 rounded-xl flex items-center justify-center transition-all active:scale-90 shadow-md">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 bg-surface-container-lowest shadow-lg rounded-t-xl">
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200 ease-out">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200 ease-out">
+<span class="material-symbols-outlined" data-icon="pill">pill</span>
+<span class="font-label-md text-label-md">Schedule</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1.5 active:scale-90 duration-200 ease-out">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-md text-label-md">Assistant</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200 ease-out">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</button>
+</nav>
+<script src="/public/app.js?v=20260609-login-clean"></script>
+</body></html>

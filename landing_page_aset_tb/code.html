@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ASET-TB - Pendamping Kesembuhan Anda</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Atkinson+Hyperlegible+Next:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#717786",
+                    "surface-container-low": "#f1f3fe",
+                    "background": "#f9f9ff",
+                    "surface-variant": "#e0e2ed",
+                    "primary-container": "#0070ea",
+                    "secondary": "#006c4f",
+                    "primary": "#0059bb",
+                    "on-secondary-container": "#007354",
+                    "tertiary": "#9e3d00",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#67fcc6",
+                    "on-tertiary-fixed-variant": "#7c2e00",
+                    "outline-variant": "#c1c6d7",
+                    "on-primary-fixed-variant": "#004493",
+                    "surface-tint": "#005bc0",
+                    "surface-bright": "#f9f9ff",
+                    "primary-fixed": "#d8e2ff",
+                    "error-container": "#ffdad6",
+                    "on-secondary": "#ffffff",
+                    "tertiary-container": "#c64f00",
+                    "on-primary-fixed": "#001a41",
+                    "primary-fixed-dim": "#adc7ff",
+                    "surface": "#f9f9ff",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#2d3039",
+                    "on-secondary-fixed-variant": "#00513a",
+                    "on-surface-variant": "#414754",
+                    "surface-container-highest": "#e0e2ed",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed": "#ffdbcc",
+                    "on-secondary-fixed": "#002116",
+                    "surface-container-high": "#e6e8f3",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed-dim": "#ffb695",
+                    "on-tertiary-fixed": "#351000",
+                    "secondary-fixed-dim": "#44dfab",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#d7d9e5",
+                    "secondary-container": "#67fcc6",
+                    "on-primary-container": "#fefcff",
+                    "inverse-on-surface": "#eef0fb",
+                    "on-tertiary-container": "#fffbff",
+                    "on-background": "#181c23",
+                    "on-surface": "#181c23",
+                    "on-tertiary": "#ffffff",
+                    "inverse-primary": "#adc7ff",
+                    "surface-container": "#ebedf9"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "sm": "12px",
+                    "lg": "40px",
+                    "xs": "4px",
+                    "md": "24px",
+                    "gutter": "16px",
+                    "base": "8px",
+                    "xl": "64px",
+                    "container-margin": "20px"
+            },
+            "fontFamily": {
+                    "headline-xl": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "headline-sm": ["Manrope"],
+                    "body-lg": ["Atkinson Hyperlegible Next"],
+                    "body-md": ["Atkinson Hyperlegible Next"],
+                    "label-md": ["Atkinson Hyperlegible Next"],
+                    "button-text": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-xl": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Navigation Header (Based on TopAppBar JSON) -->
+<header class="sticky top-0 z-50 flex justify-between items-center px-gutter h-16 w-full max-w-7xl mx-auto bg-surface-container-low shadow-sm">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-headline-md" data-icon="menu">menu</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">ASET-TB</h1>
+</div>
+<div class="flex items-center gap-md">
+<nav class="hidden md:flex gap-md">
+<a class="text-primary font-bold font-label-md text-label-md" href="#">Home</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/50 transition-colors font-label-md text-label-md px-2 py-1 rounded" href="#benefits">Fitur</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/50 transition-colors font-label-md text-label-md px-2 py-1 rounded" href="#">Edukasi</a>
+</nav>
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold shadow-sm">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+</div>
+</header>
+<main class="w-full">
+<!-- Hero Section -->
+<section class="relative overflow-hidden pt-xl pb-24 md:py-32">
+<div class="max-w-7xl mx-auto px-gutter grid grid-cols-1 lg:grid-cols-2 gap-xl items-center relative z-10">
+<div class="space-y-md">
+<div class="inline-flex items-center gap-sm bg-secondary-container text-on-secondary-container px-4 py-2 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-lg" data-icon="verified">verified</span>
+<span class="font-label-md text-label-md">Mitra Kesehatan Terpercaya</span>
+</div>
+<h2 class="font-headline-xl text-headline-xl lg:text-5xl lg:leading-tight text-on-surface">
+                        ASET-TB: <span class="text-primary">Pendamping Kesembuhan Anda</span>
+</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xl">
+                        Kepatuhan konsumsi obat adalah kunci utama kesembuhan Tuberkulosis. ASET-TB hadir untuk menemani perjalanan kesehatan Anda dengan pengingat cerdas, edukasi mendalam, dan dukungan penuh setiap hari.
+                    </p>
+<div class="pt-base flex flex-col sm:flex-row gap-sm">
+<a href="/api/auth/google/start" data-google-login class="inline-flex w-full sm:w-auto min-w-[280px] items-center justify-center gap-sm rounded-lg border border-outline-variant bg-surface-container-lowest px-6 py-3 text-center shadow-sm transition-all hover:bg-surface-container-low active:scale-95">
+<img alt="Google Logo" class="w-6 h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgQUFvCetBb03Q9YpcATISsQ0CYOZLsi2nHWoFsHYq8Leq38uNlZ01OFnwCprekK80hSYesJrzArhGgbFFjEXsur05GIdTPU2P-acJ67YzZ8z87GkLCAPn5L-cG7bVhAv1h_hJ8ow2IJC83gb3-PMZY6yNi97vjM6PHeCQrqKwzKrKe2oJISc2jCIU5u6f5scl5UWdMPkLZjI11C9JxWf4QjfGUqXoI5VwJa4gTOIvSiMDrKOhc__2vp-n7LnoaYBZEUPT5y03LzlT"/>
+<span class="whitespace-nowrap font-button-text text-button-text leading-none text-on-surface">Masuk dengan Google</span>
+</a>
+</div>
+</div>
+<div class="relative">
+<div class="absolute -top-12 -right-12 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+<div class="absolute -bottom-12 -left-12 w-64 h-64 bg-secondary/10 rounded-full blur-3xl"></div>
+<div class="relative glass-card border border-outline-variant/30 rounded-xl p-6 shadow-2xl overflow-hidden aspect-square md:aspect-video lg:aspect-square flex items-center justify-center">
+<img alt="Patient using healthcare app" class="w-full h-full object-cover rounded-lg shadow-lg" data-alt="A clean, minimalist high-key photograph of a patient's hand holding a modern smartphone in a bright, sunlit room. The smartphone screen displays a friendly healthcare dashboard with soft blue and teal accents. The background is a soft-focus clinical environment with warm wooden textures and green plants, creating a calm and supportive atmosphere. The lighting is diffused and professional, emphasizing a modern light-mode design aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0vZxw9qaSwNsMR23WvYkSC1GI7U6Ip7vzElfVMqDWbKbOjiN80uP3kEDbucVIZIgbxmONnymv58md7HTfC74sFeqZbbH71Xb81WG9HH_TdRVmNpl8PuMMLS3xsDt-ogeXNexJ_DPIDYiYQv8r9DNPPpmU4GlPvEkeU_AIGRF4J-2PHhzY7kEYF_95yf5eyMC1W7n1AR1F6SVFVABwdfnqEX7YEyZRRoaB9B7OzMWmzJxBEejlTPHTkI4GeDhQSIdoEsvVBSoFR2ki"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Benefits Section -->
+<section class="py-xl bg-surface-container-low" id="benefits">
+<div class="max-w-7xl mx-auto px-gutter">
+<div class="text-center mb-xl">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-base">Mengapa Memilih ASET-TB?</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Solusi digital komprehensif untuk mendukung proses pemulihan Anda.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- Reminder Obat - Large Card -->
+<div class="md:col-span-2 bg-surface-container-lowest border border-outline-variant/30 p-md rounded-xl shadow-lg hover:shadow-xl transition-shadow flex flex-col md:flex-row gap-md items-center">
+<div class="w-full md:w-1/2">
+<div class="w-12 h-12 bg-primary-container text-on-primary-container rounded-lg flex items-center justify-center mb-sm shadow-md">
+<span class="material-symbols-outlined text-2xl" data-icon="pill">pill</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-xs">Reminder Obat</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                                Jangan pernah melewatkan dosis lagi. Jadwal pengobatan TB yang ketat dipermudah dengan notifikasi pintar yang disesuaikan dengan rutinitas harian Anda.
+                            </p>
+</div>
+<div class="w-full md:w-1/2 h-48 bg-primary-fixed/20 rounded-lg overflow-hidden flex items-center justify-center">
+<img alt="Medication tracking" class="w-full h-full object-cover" data-alt="A high-contrast, professional close-up of a digital tablet showing a clean medication tracking interface with soft teal progress bars. The background includes a neatly organized pill organizer on a white marble surface. The scene is illuminated by cool, bright morning light, creating a sense of clarity, order, and reliable healthcare management in a modern light-mode environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuALzoHnnNBOGkph3-e-yd-4Nz4W5j0l1LGRmvF6rYTVQzInbocU2T3WOqWj6FHcChD9kmb5UXEW7DWT3tfKzVLYsgHa_RFOe0LoFizheFVFtGflgZOR8cRwHV4CTVo9-7eA-HXA9pcY6fHx2L9FGeAu8QN-BpcO-l_KhDhzXLCsN1WthFQDIpmMo9DmUTITJ9IMPIDA_MJV7JNRdTTxxBVwXuKYaDR0AtK7vqT8zv6C0zdaqObQ_-akIl9aexEjrAIcgtzowr8joFlH"/>
+</div>
+</div>
+<!-- Edukasi TB -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 p-md rounded-xl shadow-lg hover:shadow-xl transition-shadow flex flex-col">
+<div class="w-12 h-12 bg-secondary-container text-on-secondary-container rounded-lg flex items-center justify-center mb-sm shadow-md">
+<span class="material-symbols-outlined text-2xl" data-icon="menu_book">menu_book</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-xs">Edukasi TB</h4>
+<p class="font-body-md text-body-md text-on-surface-variant flex-grow">
+                            Akses informasi terpercaya mengenai proses penyembuhan, efek samping, dan pola hidup sehat selama masa pengobatan.
+                        </p>
+<div class="mt-md pt-md border-t border-outline-variant/20">
+<button class="text-primary font-bold flex items-center gap-xs">
+                                Baca Materi <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Chatbot AI -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 p-md rounded-xl shadow-lg hover:shadow-xl transition-shadow flex flex-col">
+<div class="w-12 h-12 bg-tertiary-container text-on-tertiary-container rounded-lg flex items-center justify-center mb-sm shadow-md">
+<span class="material-symbols-outlined text-2xl" data-icon="smart_toy">smart_toy</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-xs">Chatbot AI</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                            Dapatkan jawaban instan untuk pertanyaan seputar TB kapan saja. Asisten cerdas kami siap membantu navigasi gejala dan informasi medis dasar.
+                        </p>
+</div>
+<!-- Progress Tracking -->
+<div class="md:col-span-2 bg-surface-container-lowest border border-outline-variant/30 p-md rounded-xl shadow-lg hover:shadow-xl transition-shadow flex flex-col md:flex-row-reverse gap-md items-center">
+<div class="w-full md:w-1/2">
+<div class="w-12 h-12 bg-primary-fixed-dim text-on-primary-fixed-variant rounded-lg flex items-center justify-center mb-sm shadow-md">
+<span class="material-symbols-outlined text-2xl" data-icon="insights">insights</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-xs">Pantau Kemajuan</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                                Visualisasikan perjalanan kesembuhan Anda melalui grafik interaktif dan badge pencapaian sebagai motivasi harian.
+                            </p>
+</div>
+<div class="w-full md:w-1/2 h-48 bg-secondary-fixed/10 rounded-lg overflow-hidden p-md flex items-end">
+<div class="w-full h-full flex items-end gap-xs">
+<div class="w-full bg-secondary h-1/4 rounded-t-sm"></div>
+<div class="w-full bg-secondary h-2/4 rounded-t-sm"></div>
+<div class="w-full bg-secondary h-3/5 rounded-t-sm"></div>
+<div class="w-full bg-secondary h-4/5 rounded-t-sm"></div>
+<div class="w-full bg-primary h-full rounded-t-sm"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- App Showcase / Call to Action -->
+<section class="py-xl">
+<div class="max-w-5xl mx-auto px-gutter text-center">
+<div class="bg-primary text-on-primary p-xl rounded-2xl shadow-2xl relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+<div class="relative z-10 space-y-md">
+<h2 class="font-headline-xl text-headline-xl">Siap Memulai Perjalanan Kesembuhan?</h2>
+<p class="font-body-lg text-body-lg text-primary-fixed max-w-2xl mx-auto">
+                            Gabung dengan ribuan pejuang lainnya yang telah berhasil menyelesaikan pengobatan mereka bersama ASET-TB.
+                        </p>
+<div class="pt-base">
+<button class="bg-surface-container-lowest text-primary font-bold py-3 px-10 rounded-lg shadow-lg hover:bg-primary-fixed transition-all active:scale-95 inline-flex items-center gap-sm">
+<img alt="Google Logo" class="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5bN9vcZyPvPzs54u0ZB-LOexuM-62B5EZFt7AT6JkTc2sGUTxz0U2AjmoDDtc5TBJI9ADl1RvcZ6Wi2CCmMhL5hynW7cydrS9ynVjfJWsU7sZcMCk4m_GYOzBfnG1s-BjxQuX2QEtOcXIL1ZY9AVVuW5PUUQt-2L3rHKP5jN1Y_Am-5gkemt61W5OwoepST2SN5-G-6Vcfl3TcV0eJiAKsHYWRv0BcamFiGFdfiMFHIt2jP96E_fVOlgzZMOxMRjqcU5v8FRghzqS"/>
+                                Masuk Sekarang
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer (Based on Footer JSON) -->
+<footer class="w-full py-xl px-gutter flex flex-col items-center gap-md text-center mt-auto bg-surface-container-high border-t border-outline-variant/30">
+<h2 class="font-headline-sm text-headline-sm text-primary">ASET-TB</h2>
+<div class="flex flex-wrap justify-center gap-md">
+<a class="text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md" href="#">Contact Support</a>
+<a class="text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md" href="#">Emergency Hotline</a>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant max-w-md">
+            © 2024 ASET-TB Healthcare System. Supporting your recovery journey.
+        </p>
+</footer>
+<!-- Bottom Navigation (Mobile Only - Based on BottomNavBar JSON) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 bg-surface-container-lowest shadow-[0_-4px_20px_rgba(0,89,187,0.06)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1.5 active:scale-90 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="pill">pill</span>
+<span class="font-label-md text-label-md">Schedule</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="smart_toy">smart_toy</span>
+<span class="font-label-md text-label-md">Assistant</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 hover:text-primary transition-all active:scale-90 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+<script src="/public/app.js?v=20260609-login-clean"></script>
+</body></html>

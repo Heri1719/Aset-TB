@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edukasi TB - ASET-TB</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Atkinson+Hyperlegible+Next:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+</head>
+<body class="bg-[#f9f9ff] text-[#181c23] min-h-screen font-[Atkinson_Hyperlegible_Next]">
+<header class="sticky top-0 z-50 flex justify-between items-center px-4 h-16 w-full max-w-3xl mx-auto bg-[#f1f3fe] shadow-sm">
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-full hover:bg-[#e0e2ed]" data-nav="dashboard"><span class="material-symbols-outlined text-[#0059bb]">arrow_back</span></button>
+<h1 class="font-[Manrope] text-2xl font-bold text-[#0059bb]">Edukasi TB</h1>
+</div>
+</header>
+<main class="w-full max-w-3xl mx-auto px-4 py-6 pb-28">
+<div id="education-list" class="space-y-4"></div>
+</main>
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 h-20 bg-white shadow-lg rounded-t-xl">
+<button data-nav="dashboard" class="flex flex-col items-center text-[#414754]"><span class="material-symbols-outlined">home</span><span>Home</span></button>
+<button data-nav="schedule" class="flex flex-col items-center text-[#414754]"><span class="material-symbols-outlined">pill</span><span>Schedule</span></button>
+<button data-nav="chatbot" class="flex flex-col items-center text-[#414754]"><span class="material-symbols-outlined">smart_toy</span><span>Assistant</span></button>
+<button data-nav="profile" class="flex flex-col items-center text-[#414754]"><span class="material-symbols-outlined">person</span><span>Profile</span></button>
+</nav>
+<script src="/public/app.js?v=20260609-login-clean"></script>
+</body>
+</html>
