@@ -600,10 +600,20 @@ async function serveStatic(req, res, url) {
   }
 }
 
-const server = http.createServer(async (req, res) => {
+let readyPromise;
+
+function ensureReady() {
+  if (!readyPromise) {
+    readyPromise = store.ensureConnected();
+  }
+  return readyPromise;
+}
+
+async function requestHandler(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   try {
     if (url.pathname.startsWith("/api/")) {
+      await ensureReady();
       await handleApi(req, res, url);
       return;
     }
@@ -615,17 +625,23 @@ const server = http.createServer(async (req, res) => {
   } catch (error) {
     sendJson(res, 500, { error: error.message || "Terjadi kesalahan server" });
   }
-});
+}
 
-store.ensureConnected()
-  .then(() => {
-    server.listen(port, host, () => {
-      console.log(`ASET-TB berjalan di http://${host}:${port}`);
-      startReminderScheduler();
+const server = http.createServer(requestHandler);
+
+if (require.main === module) {
+  ensureReady()
+    .then(() => {
+      server.listen(port, host, () => {
+        console.log(`ASET-TB berjalan di http://${host}:${port}`);
+        startReminderScheduler();
+      });
+    })
+    .catch(error => {
+      console.error("Gagal terhubung ke PostgreSQL:", error.message);
+      console.error("Pastikan DATABASE_URL benar dan jalankan: npm run db:migrate");
+      process.exit(1);
     });
-  })
-  .catch(error => {
-    console.error("Gagal terhubung ke PostgreSQL:", error.message);
-    console.error("Pastikan DATABASE_URL benar dan jalankan: npm run db:migrate");
-    process.exit(1);
-  });
+}
+
+module.exports = requestHandler;
