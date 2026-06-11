@@ -1037,7 +1037,7 @@
     try {
       data = await api("/api/nurse/overview", { redirectOnAuth: false });
     } catch (error) {
-      const email = window.prompt("Masukkan email perawat untuk login demo:", "hcahyanto@ikbis.ac.id");
+      const email = window.prompt("Masukkan email admin/perawat:", "hcahyanto@ikbis.ac.id");
       if (!email) throw error;
       await api("/api/auth/nurse-login", { method: "POST", body: JSON.stringify({ email }) });
       data = await api("/api/nurse/overview");
