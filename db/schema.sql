@@ -85,6 +85,16 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS daily_motivation_scores (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  patient_id uuid NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+  score integer NOT NULL CHECK (score BETWEEN 0 AND 100),
+  raw_value integer NOT NULL CHECK (raw_value BETWEEN 1 AND 5),
+  note text,
+  answers jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS medication_email_notifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   medication_id uuid NOT NULL REFERENCES medications(id) ON DELETE CASCADE,

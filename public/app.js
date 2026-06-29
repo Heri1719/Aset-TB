@@ -1,5 +1,183 @@
 (function () {
-  function showToast(message) {
+  const LANGUAGE_STORAGE_KEY = "aset-tb-language";
+  const dictionary = {
+    en: {
+      "Jadwal Pengobatan": "Medication Schedule",
+      "Obat Hari Ini": "Today's Medication",
+      "Jadwal Terjadwal": "Scheduled Medication",
+      "Jadwal Berikutnya": "Next Schedule",
+      "Kepatuhan Pengobatan": "Treatment Adherence",
+      "Edukasi TB": "TB Education",
+      "Pelajari Gejala": "Learn About Symptoms",
+      "Tanya Asisten ASET-TB": "Ask ASET-TB Assistant",
+      "Motivasi dan informasi TB dari AI ASET.": "Motivation and TB information from ASET AI.",
+      "Survei Motivasi Harian": "Daily Motivation Survey",
+      "Nilai Motivasi Harian": "Daily Motivation Score",
+      "Pesan Motivasi Sesuai Nilai Hari Ini": "Motivation Message Based on Today's Score",
+      "Catatan Harian": "Daily Notes",
+      "Profil": "Profile",
+      "Keluar": "Sign Out",
+      "Home": "Home",
+      "Schedule": "Schedule",
+      "Assistant": "Assistant",
+      "Profile": "Profile",
+      "Dashboard Perawat": "Nurse Dashboard",
+      "Patient List": "Patient List",
+      "Medication Schedule": "Medication Schedule",
+      "Assessment Results": "Assessment Results",
+      "Education Content": "Education Content",
+      "Motivation Messages": "Motivation Messages",
+      "Settings": "Settings",
+      "Belum Konfirmasi": "Not Confirmed",
+      "Diminum": "Taken",
+      "Terlambat": "Late",
+      "Terlewat": "Missed",
+      "Rekam & Konfirmasi Minum Obat": "Record & Confirm Medication Taken",
+      "Lihat video konfirmasi": "View confirmation video",
+      "Simpan Survei Motivasi": "Save Motivation Survey",
+      "Perbarui Survei Motivasi": "Update Motivation Survey",
+      "Simpan Nilai Motivasi": "Save Motivation Score",
+      "Belum ada jadwal": "No schedule yet",
+      "Tidak ada jadwal": "No schedule",
+      "Belum ada jadwal obat pada tanggal ini.": "There is no medication schedule on this date.",
+      "Belum diisi hari ini": "Not completed today",
+      "Belum dinilai hari ini": "Not scored today",
+      "Fase Pengobatan": "Treatment Phase",
+      "Hari Terapi": "Treatment Days",
+      "Nomor Rekam Medis": "Medical Record Number",
+      "Estimasi Selesai": "Estimated Completion",
+      "Motivasi tinggi": "High motivation",
+      "Motivasi cukup": "Moderate motivation",
+      "Motivasi rendah": "Low motivation",
+      "Motivasi sangat rendah": "Very low motivation",
+      "Sangat setuju": "Strongly agree",
+      "Setuju": "Agree",
+      "Tidak setuju": "Disagree",
+      "Sangat tidak setuju": "Strongly disagree",
+      "Pesan Semangat Hari Ini": "Today's Encouragement",
+      "Luar biasa! Pertahankan konsistensi Anda.": "Excellent. Keep up your consistency.",
+      "Memuat nilai dan pesan motivasi harian...": "Loading today's motivation score and messages...",
+      "Skor survei hari ini menjadi dasar pesan dukungan yang sesuai.": "Today's survey score guides the support message you receive.",
+      "Jawab 5 pertanyaan singkat. Skor ini menjadi dasar pesan motivasi hari ini. Sudah diisi hari ini.": "Answer 5 short questions. Your score guides today's motivation message. Completed today.",
+      "Jawab 5 pertanyaan singkat. Skor ini menjadi dasar pesan motivasi hari ini. Diisi setiap hari.": "Answer 5 short questions. Your score guides today's motivation message. Complete this every day.",
+      "Hari ini saya siap minum obat sesuai jadwal.": "Today I am ready to take my medication as scheduled.",
+      "Saya percaya minum obat TB secara teratur membantu saya sembuh.": "I believe taking TB medication regularly helps me recover.",
+      "Hari ini saya merasa bosan atau malas untuk minum obat.": "Today I feel bored or reluctant to take my medication.",
+      "Jika ada keluhan, saya akan meminta bantuan keluarga/perawat dan tetap mengikuti arahan.": "If I have concerns, I will ask my family or nurse for help and follow their guidance.",
+      "Saya berkomitmen tidak berhenti obat sebelum dokter/perawat menyatakan aman.": "I am committed to not stopping medication until my doctor or nurse says it is safe.",
+      "Isi nilai motivasi hari ini untuk mendapatkan pesan yang lebih sesuai.": "Complete today's motivation survey to receive a more personalised message.",
+      "Mulai dari satu hal kecil: lihat jadwal obat terdekat hari ini.": "Start with one small step: check your next medication schedule today.",
+      "Letakkan obat dan air minum di tempat yang mudah terlihat.": "Keep your medication and drinking water somewhere easy to see.",
+      "Beri tahu keluarga atau pendamping bahwa Anda ingin dibantu mengingat jadwal.": "Tell a family member or caregiver that you would like help remembering your schedule.",
+      "Motivasi Anda sangat kuat hari ini. Jadikan ini modal untuk konsisten.": "Your motivation is very strong today. Use it to stay consistent.",
+      "Gunakan energi positif ini untuk menjaga jadwal minum obat tetap konsisten.": "Use this positive energy to keep your medication schedule consistent.",
+      "Catatan konfirmasi hari ini akan menjadi bukti nyata kemajuan Anda.": "Today's confirmation record is real evidence of your progress.",
+      "Bagikan semangat ini kepada keluarga agar dukungan di rumah semakin kuat.": "Share this encouragement with your family to strengthen support at home.",
+      "Motivasi Anda cukup baik. Jaga dengan langkah sederhana.": "Your motivation is in a good place. Maintain it with simple steps.",
+      "Siapkan obat dan air minum sebelum jam jadwal agar lebih mudah dilakukan.": "Prepare your medication and water before the scheduled time to make it easier.",
+      "Ingat tujuan utama: setiap dosis membawa Anda lebih dekat ke pemulihan.": "Remember the main goal: every dose brings you closer to recovery.",
+      "Bila mulai ragu, buka jadwal dan lakukan satu konfirmasi hari ini.": "If you start to hesitate, open your schedule and complete one confirmation today.",
+      "Motivasi Anda sedang rendah. Kita sederhanakan target hari ini.": "Your motivation is low today. Let's simplify today's goal.",
+      "Pilih satu jadwal obat terdekat dan fokus menyelesaikannya dulu.": "Choose the nearest medication schedule and focus on completing that first.",
+      "Tidak perlu sempurna; yang penting tetap kembali ke rencana pengobatan.": "You do not need to be perfect; what matters is returning to your treatment plan.",
+      "Minta dukungan keluarga atau perawat bila hari ini terasa berat.": "Ask your family or nurse for support if today feels difficult.",
+      "Motivasi Anda sangat rendah hari ini. Anda tidak perlu menghadapinya sendirian.": "Your motivation is very low today. You do not have to face it alone.",
+      "Segera minta dukungan keluarga, pendamping, atau perawat sebelum jadwal obat berikutnya.": "Ask your family, caregiver, or nurse for support before the next medication schedule.",
+      "Mulai dari tindakan paling ringan: duduk, siapkan air, dan dekatkan obat.": "Start with the smallest action: sit down, prepare water, and place the medication nearby.",
+      "Jika merasa sangat berat atau ingin berhenti obat, hubungi perawat/dokter sebelum mengambil keputusan.": "If it feels overwhelming or you want to stop medication, contact your nurse or doctor before making a decision.",
+      "Mohon jawab semua pertanyaan survei motivasi harian.": "Please answer all daily motivation survey questions.",
+      "Survei Motivasi Tersimpan": "Motivation Survey Saved",
+      "Asisten Kesehatan TB": "TB Health Assistant",
+      "Saya di sini untuk mendukung perjalanan pengobatan Anda. Ajukan pertanyaan apa pun mengenai jadwal obat atau gejala.": "I am here to support your treatment journey. Ask any question about your medication schedule or symptoms.",
+      "Pertanyaan yang mungkin membantu:": "Helpful questions:",
+      "Jadwal Terjadwal": "Scheduled Medication",
+      "Tanggal yang tampil adalah jadwal yang sudah dibuat perawat.": "The displayed dates are schedules created by the nurse.",
+      "Belum ada tanggal jadwal dari perawat.": "There are no scheduled dates from the nurse yet.",
+      "Tetap Semangat!": "Keep Going!",
+      "Pastikan Anda sudah meminum dosis sesuai anjuran dokter.": "Make sure you have taken your dose as prescribed by your doctor.",
+      "Privasi": "Privacy",
+      "Privacy Policy": "Privacy Policy",
+      "Contact Support": "Contact Support",
+      "Emergency Hotline": "Emergency Hotline"
+    }
+  };
+
+  function currentLanguage() {
+    return localStorage.getItem(LANGUAGE_STORAGE_KEY) === "en" ? "en" : "id";
+  }
+
+  function languageMap(language = currentLanguage()) {
+    if (language === "en") return dictionary.en;
+    return Object.fromEntries(Object.entries(dictionary.en).map(([id, en]) => [en, id]));
+  }
+
+  function t(indonesian, english = null) {
+    return currentLanguage() === "en" ? (english || dictionary.en[indonesian] || indonesian) : indonesian;
+  }
+
+  function tf(indonesian, english, values = {}) {
+    return t(indonesian, english).replace(/\{(\w+)\}/g, (_, key) => values[key] ?? "");
+  }
+
+  function translateTextNodes(root = document.body) {
+    if (!root) return;
+    const map = languageMap();
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const parent = node.parentElement;
+        if (!parent || parent.closest("script, style, textarea, option, [data-no-i18n]")) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(node => {
+      const source = node.nodeValue;
+      const key = source.replace(/\s+/g, " ").trim();
+      const translated = map[key];
+      if (!translated || translated === key) return;
+      const leading = source.match(/^\s*/)?.[0] || "";
+      const trailing = source.match(/\s*$/)?.[0] || "";
+      node.nodeValue = `${leading}${translated}${trailing}`;
+    });
+  }
+
+  function mountLanguageSelector() {
+    if (document.querySelector("[data-language-toggle]")) return;
+    const headerActions = document.querySelector("header .flex.items-center.gap-2")
+      || document.querySelector("header .flex.items-center:last-child")
+      || document.querySelector("header");
+    if (!headerActions) return;
+    headerActions.classList.add("shrink-0");
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.languageToggle = "true";
+    button.className = "h-9 w-9 shrink-0 rounded-full border border-outline-variant bg-surface-container-lowest text-lg leading-none shadow-sm transition-colors hover:bg-primary-fixed active:scale-95";
+
+    function updateLanguageButton() {
+      const language = currentLanguage();
+      button.textContent = language === "id" ? "🇮🇩" : "🇬🇧";
+      button.title = language === "id" ? "Ganti ke English" : "Switch to Bahasa Indonesia";
+      button.setAttribute("aria-label", button.title);
+    }
+
+    updateLanguageButton();
+    button.addEventListener("click", () => {
+      const nextLanguage = currentLanguage() === "id" ? "en" : "id";
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage);
+      window.location.reload();
+    });
+    headerActions.prepend(button);
+  }
+
+  function initLanguage() {
+    document.documentElement.lang = currentLanguage();
+    mountLanguageSelector();
+    translateTextNodes();
+  }
+
+    function showToast(message) {
     let toast = document.getElementById("aset-toast");
     if (!toast) {
       toast = document.createElement("div");
@@ -27,8 +205,10 @@
   }
 
   function textIncludes(value) {
+    const reverse = languageMap("id");
+    const variants = new Set([value, dictionary.en[value], reverse[value]].filter(Boolean));
     return Array.from(document.querySelectorAll("p, h1, h2, h3, h4, span, button"))
-      .find(node => node.textContent.trim().includes(value));
+      .find(node => Array.from(variants).some(item => node.textContent.trim().includes(item)));
   }
 
   function go(path) {
@@ -141,11 +321,11 @@
 
   function statusLabel(status) {
     const labels = {
-      pending: "Belum Konfirmasi",
-      upcoming: "Belum Konfirmasi",
-      taken: "Diminum",
-      late: "Terlambat",
-      missed: "Terlewat"
+      pending: t("Belum Konfirmasi"),
+      upcoming: t("Belum Konfirmasi"),
+      taken: t("Diminum"),
+      late: t("Terlambat"),
+      missed: t("Terlewat")
     };
     return labels[status] || status || "-";
   }
@@ -253,9 +433,15 @@
     const score = adherence?.score || 0;
     const confirmed = adherence?.confirmedDays || 0;
     const days = adherence?.treatmentDays || 1;
-    if (score >= 90) return `Luar biasa. ${confirmed} dari ${days} hari jadwal yang sudah berjalan memiliki konfirmasi.`;
-    if (score >= 60) return `${confirmed} dari ${days} hari jadwal sudah terkonfirmasi. Terus pertahankan ritmenya.`;
-    return `Mulai hari ini, setiap konfirmasi akan menaikkan catatan kepatuhan Anda. Saat ini ${confirmed} dari ${days} hari jadwal.`;
+    if (score >= 90) return currentLanguage() === "en"
+      ? `Excellent. ${confirmed} of ${days} scheduled days have been confirmed.`
+      : `Luar biasa. ${confirmed} dari ${days} hari jadwal yang sudah berjalan memiliki konfirmasi.`;
+    if (score >= 60) return currentLanguage() === "en"
+      ? `${confirmed} of ${days} scheduled days have been confirmed. Keep the rhythm going.`
+      : `${confirmed} dari ${days} hari jadwal sudah terkonfirmasi. Terus pertahankan ritmenya.`;
+    return currentLanguage() === "en"
+      ? `Starting today, every confirmation improves your adherence record. You currently have ${confirmed} of ${days} scheduled days.`
+      : `Mulai hari ini, setiap konfirmasi akan menaikkan catatan kepatuhan Anda. Saat ini ${confirmed} dari ${days} hari jadwal.`;
   }
 
   function homeMedicationStatusClass(status) {
@@ -286,86 +472,127 @@
     };
   }
 
+  const motivationSurveyQuestions = [
+    { id: "Hari ini saya siap minum obat sesuai jadwal.", en: "Today I am ready to take my medication as scheduled.", reverse: false },
+    { id: "Saya percaya minum obat TB secara teratur membantu saya sembuh.", en: "I believe taking TB medication regularly helps me recover.", reverse: false },
+    { id: "Hari ini saya merasa bosan atau malas untuk minum obat.", en: "Today I feel bored or reluctant to take my medication.", reverse: true },
+    { id: "Jika ada keluhan, saya akan meminta bantuan keluarga/perawat dan tetap mengikuti arahan.", en: "If I have concerns, I will ask my family or nurse for help and follow their guidance.", reverse: false },
+    { id: "Saya berkomitmen tidak berhenti obat sebelum dokter/perawat menyatakan aman.", en: "I am committed to not stopping medication until my doctor or nurse says it is safe.", reverse: false }
+  ];
+
+  const motivationSurveyOptions = [
+    { label: "SS", value: 4, id: "Sangat setuju", en: "Strongly agree" },
+    { label: "S", value: 3, id: "Setuju", en: "Agree" },
+    { label: "TS", value: 2, id: "Tidak setuju", en: "Disagree" },
+    { label: "STS", value: 1, id: "Sangat tidak setuju", en: "Strongly disagree" }
+  ];
+
+  function motivationCategory(score) {
+    const value = Number(score || 0);
+    if (value >= 80) return t("Motivasi tinggi", "High motivation");
+    if (value >= 60) return t("Motivasi cukup", "Moderate motivation");
+    if (value >= 40) return t("Motivasi rendah", "Low motivation");
+    return t("Motivasi sangat rendah", "Very low motivation");
+  }
+
   function motivationScoreFormMarkup(data) {
     const current = data.motivationScoreToday || {};
     const submitted = Boolean(current.submittedToday);
     const score = current.score ?? 0;
+    const answers = Array.isArray(current.answers) ? current.answers.map(Number) : [];
+    const questionMarkup = motivationSurveyQuestions.map((question, index) => `
+      <fieldset class="rounded-lg bg-surface-container-lowest border border-outline-variant/60 p-sm space-y-xs">
+        <legend class="font-label-md font-bold text-on-surface mb-xs">${index + 1}. ${t(question.id, question.en)}</legend>
+        <div class="grid grid-cols-4 gap-xs" aria-label="${tf("Jawaban pertanyaan {number}", "Answer to question {number}", { number: index + 1 })}">
+          ${motivationSurveyOptions.map(option => `
+            <label class="text-center rounded-lg border border-outline-variant/60 bg-surface-container-lowest py-2 px-1 cursor-pointer hover:bg-primary/5">
+              <input class="sr-only peer" type="radio" name="motivationAnswer${index}" value="${option.value}" ${answers[index] === option.value ? "checked" : ""} required>
+              <span class="block peer-checked:text-primary peer-checked:font-bold">${option.label}</span>
+              <span class="block text-[11px] text-on-surface-variant leading-tight">${t(option.id, option.en)}</span>
+            </label>`).join("")}
+        </div>
+      </fieldset>`).join("");
+
     return `
       <form id="motivation-score-form" class="rounded-xl bg-primary-fixed/40 border border-primary-fixed-dim p-sm space-y-sm">
         <div class="flex items-start justify-between gap-sm">
           <div>
-            <h4 class="font-label-md font-bold text-on-surface">Nilai Motivasi Hari Ini</h4>
-            <p class="text-sm text-on-surface-variant">Beri nilai motivasi Anda hari ini dari 1 sampai 5. ${submitted ? "Sudah dinilai hari ini." : "Diisi setiap hari."}</p>
+            <h4 class="font-label-md font-bold text-on-surface">Survei Motivasi Harian</h4>
+            <p class="text-sm text-on-surface-variant">Jawab 5 pertanyaan singkat. Skor ini menjadi dasar pesan motivasi hari ini. ${submitted ? "Sudah diisi hari ini." : "Diisi setiap hari."}</p>
           </div>
-          <span id="motivation-score-current" class="px-3 py-1 rounded-full bg-primary text-on-primary font-bold text-sm">${score}%</span>
+          <div class="text-right space-y-1">
+            <span id="motivation-score-current" class="inline-block px-3 py-1 rounded-full bg-primary text-on-primary font-bold text-sm">${score}%</span>
+            <p id="motivation-score-category" class="text-xs text-on-surface-variant">${motivationCategory(score)}</p>
+          </div>
         </div>
-        <div class="grid grid-cols-5 gap-xs" aria-label="Nilai motivasi harian">
-          ${[1, 2, 3, 4, 5].map(value => `
-            <label class="text-center rounded-lg border border-outline-variant/60 bg-surface-container-lowest py-2 cursor-pointer hover:bg-primary/5">
-              <input class="sr-only peer" type="radio" name="motivationValue" value="${value}" ${current.rawValue === value ? "checked" : ""} required>
-              <span class="block peer-checked:text-primary peer-checked:font-bold">${value}</span>
-            </label>`).join("")}
+        <div class="grid grid-cols-4 gap-xs rounded-lg bg-surface-container-low px-3 py-2 text-xs text-on-surface-variant text-center">
+          ${motivationSurveyOptions.map(option => `<span><b>${option.label}</b><br>${t(option.id, option.en)}</span>`).join("")}
         </div>
-        <button class="w-full h-10 bg-primary text-on-primary rounded-lg font-button-text active:scale-[0.98] transition-transform" type="submit">${submitted ? "Perbarui Nilai Motivasi" : "Simpan Nilai Motivasi"}</button>
+        <div class="space-y-sm">${questionMarkup}</div>
+        <button class="w-full h-10 bg-primary text-on-primary rounded-lg font-button-text active:scale-[0.98] transition-transform" type="submit">${submitted ? "Perbarui Survei Motivasi" : "Simpan Survei Motivasi"}</button>
       </form>`;
   }
 
   function dailyMotivationMessagesMarkup(data) {
     const current = data.motivationScoreToday || {};
     const score = Number(current.score || 0);
-    const raw = Number(current.rawValue || 0);
     const submitted = Boolean(current.submittedToday);
-    let tone = "Isi nilai motivasi hari ini untuk mendapatkan pesan yang lebih sesuai.";
+    let tone = t(
+      "Isi nilai motivasi hari ini untuk mendapatkan pesan yang lebih sesuai.",
+      "Complete today's motivation survey to receive a more personalised message."
+    );
     let messages = [
-      "Mulai dari satu hal kecil: lihat jadwal obat terdekat hari ini.",
-      "Letakkan obat dan air minum di tempat yang mudah terlihat.",
-      "Beri tahu keluarga atau pendamping bahwa Anda ingin dibantu mengingat jadwal."
+      t("Mulai dari satu hal kecil: lihat jadwal obat terdekat hari ini.", "Start with one small step: check your next medication schedule today."),
+      t("Letakkan obat dan air minum di tempat yang mudah terlihat.", "Keep your medication and drinking water somewhere easy to see."),
+      t("Beri tahu keluarga atau pendamping bahwa Anda ingin dibantu mengingat jadwal.", "Tell a family member or caregiver that you would like help remembering your schedule.")
     ];
 
-    if (score >= 80 || raw >= 4) {
-      tone = raw === 5 ? "Motivasi Anda sangat kuat hari ini. Jadikan ini modal untuk konsisten." : "Motivasi Anda kuat hari ini. Pertahankan ritme baik ini.";
+    if (score >= 80) {
+      tone = t("Motivasi Anda sangat kuat hari ini. Jadikan ini modal untuk konsisten.", "Your motivation is very strong today. Use it to stay consistent.");
       messages = [
-        "Gunakan energi positif ini untuk menjaga jadwal minum obat tetap konsisten.",
-        "Catatan konfirmasi hari ini akan menjadi bukti nyata kemajuan Anda.",
-        "Bagikan semangat ini kepada keluarga agar dukungan di rumah semakin kuat."
+        t("Gunakan energi positif ini untuk menjaga jadwal minum obat tetap konsisten.", "Use this positive energy to keep your medication schedule consistent."),
+        t("Catatan konfirmasi hari ini akan menjadi bukti nyata kemajuan Anda.", "Today's confirmation record is real evidence of your progress."),
+        t("Bagikan semangat ini kepada keluarga agar dukungan di rumah semakin kuat.", "Share this encouragement with your family to strengthen support at home.")
       ];
-    } else if (score >= 60 || raw === 3) {
-      tone = "Motivasi Anda cukup baik. Jaga dengan langkah sederhana.";
+    } else if (score >= 60) {
+      tone = t("Motivasi Anda cukup baik. Jaga dengan langkah sederhana.", "Your motivation is in a good place. Maintain it with simple steps.");
       messages = [
-        "Siapkan obat dan air minum sebelum jam jadwal agar lebih mudah dilakukan.",
-        "Ingat tujuan utama: setiap dosis membawa Anda lebih dekat ke pemulihan.",
-        "Bila mulai ragu, buka jadwal dan lakukan satu konfirmasi hari ini."
+        t("Siapkan obat dan air minum sebelum jam jadwal agar lebih mudah dilakukan.", "Prepare your medication and water before the scheduled time to make it easier."),
+        t("Ingat tujuan utama: setiap dosis membawa Anda lebih dekat ke pemulihan.", "Remember the main goal: every dose brings you closer to recovery."),
+        t("Bila mulai ragu, buka jadwal dan lakukan satu konfirmasi hari ini.", "If you start to hesitate, open your schedule and complete one confirmation today.")
       ];
-    } else if (score >= 40 || raw === 2) {
-      tone = "Motivasi Anda sedang rendah. Kita sederhanakan target hari ini.";
+    } else if (score >= 40) {
+      tone = t("Motivasi Anda sedang rendah. Kita sederhanakan target hari ini.", "Your motivation is low today. Let's simplify today's goal.");
       messages = [
-        "Fokus hanya pada jadwal obat berikutnya, bukan seluruh perjalanan pengobatan.",
-        "Pasang pengingat tambahan dan siapkan obat di tempat yang mudah dijangkau.",
-        "Hubungi keluarga atau perawat untuk menemani satu langkah kecil hari ini."
+        t("Pilih satu jadwal obat terdekat dan fokus menyelesaikannya dulu.", "Choose the nearest medication schedule and focus on completing that first."),
+        t("Tidak perlu sempurna; yang penting tetap kembali ke rencana pengobatan.", "You do not need to be perfect; what matters is returning to your treatment plan."),
+        t("Minta dukungan keluarga atau perawat bila hari ini terasa berat.", "Ask your family or nurse for support if today feels difficult.")
       ];
     } else if (submitted) {
-      tone = "Motivasi Anda sangat rendah hari ini. Anda tidak perlu menghadapinya sendirian.";
+      tone = t("Motivasi Anda sangat rendah hari ini. Anda tidak perlu menghadapinya sendirian.", "Your motivation is very low today. You do not have to face it alone.");
       messages = [
-        "Segera minta dukungan keluarga, pendamping, atau perawat sebelum jadwal obat berikutnya.",
-        "Mulai dari tindakan paling ringan: duduk, siapkan air, dan dekatkan obat.",
-        "Jika merasa sangat berat atau ingin berhenti obat, hubungi perawat/dokter sebelum mengambil keputusan."
+        t("Segera minta dukungan keluarga, pendamping, atau perawat sebelum jadwal obat berikutnya.", "Ask your family, caregiver, or nurse for support before the next medication schedule."),
+        t("Mulai dari tindakan paling ringan: duduk, siapkan air, dan dekatkan obat.", "Start with the smallest action: sit down, prepare water, and place the medication nearby."),
+        t("Jika merasa sangat berat atau ingin berhenti obat, hubungi perawat/dokter sebelum mengambil keputusan.", "If it feels overwhelming or you want to stop medication, contact your nurse or doctor before making a decision.")
       ];
     }
 
-    const description = submitted ? tone : "Isi nilai motivasi hari ini untuk mendapatkan pesan yang lebih sesuai.";
+    const description = submitted ? tone : t(
+      "Isi nilai motivasi hari ini untuk mendapatkan pesan yang lebih sesuai.",
+      "Complete today's motivation survey to receive a more personalised message."
+    );
     const messageItems = messages.map(message => `<li class="flex gap-xs"><span class="material-symbols-outlined text-secondary text-base">check_circle</span><span>${message}</span></li>`).join("");
     return `
       <section id="daily-motivation-messages" class="rounded-xl bg-surface-container-low border border-outline-variant/30 p-sm space-y-sm">
         <div class="flex items-start justify-between gap-sm">
           <div>
-            <h4 class="font-label-md font-bold text-on-surface">Pesan Motivasi Sesuai Nilai Hari Ini</h4>
+            <h4 class="font-label-md font-bold text-on-surface">${t("Pesan Motivasi Sesuai Nilai Hari Ini", "Motivation Message Based on Today's Score")}</h4>
             <p class="text-sm text-on-surface-variant">${description}</p>
           </div>
           <span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-bold text-sm">${score}%</span>
         </div>
         <ul class="space-y-xs text-sm text-on-surface-variant">${messageItems}</ul>
       </section>`;
-
   }
 
   function renderHomeDailyCard(data) {
@@ -380,8 +607,8 @@
       <div class="flex items-start gap-sm">
         <span class="material-symbols-outlined text-primary mt-1" style="font-variation-settings: 'FILL' 1;">psychology_alt</span>
         <div>
-          <h3 class="font-headline-sm text-headline-sm">Nilai Motivasi Harian</h3>
-          <p class="text-on-surface-variant text-sm">Nilai motivasi hari ini akan menampilkan pesan dukungan yang sesuai.</p>
+          <h3 class="font-headline-sm text-headline-sm">Survei Motivasi Harian</h3>
+          <p class="text-on-surface-variant text-sm">Skor survei hari ini menjadi dasar pesan dukungan yang sesuai.</p>
         </div>
       </div>
       <blockquote class="rounded-lg bg-primary-fixed/50 border border-primary-fixed-dim p-sm text-on-surface font-label-md italic">"${data.motivation}"</blockquote>
@@ -391,22 +618,25 @@
     card.querySelector("#motivation-score-form")?.addEventListener("submit", async event => {
       event.preventDefault();
       const form = event.currentTarget;
-      const value = Number(new FormData(form).get("motivationValue"));
-      if (!Number.isFinite(value)) {
-        showToast("Mohon pilih nilai motivasi hari ini.");
+      const formData = new FormData(form);
+      const answers = motivationSurveyQuestions.map((_, index) => Number(formData.get(`motivationAnswer${index}`)));
+      if (answers.some(value => !Number.isFinite(value))) {
+        showToast("Mohon jawab semua pertanyaan survei motivasi harian.");
         return;
       }
       try {
         const result = await api("/api/patient/motivation-score", {
           method: "POST",
-          body: JSON.stringify({ value })
+          body: JSON.stringify({ answers })
         });
-        form.querySelector("button").textContent = "Nilai Motivasi Tersimpan";
+        form.querySelector("button").textContent = "Survei Motivasi Tersimpan";
         const current = document.getElementById("motivation-score-current");
         if (current) current.textContent = `${result.motivationScore.score}%`;
+        const category = document.getElementById("motivation-score-category");
+        if (category) category.textContent = motivationCategory(result.motivationScore.score);
         const messages = document.getElementById("daily-motivation-messages");
         if (messages) messages.outerHTML = dailyMotivationMessagesMarkup({ ...data, motivationScoreToday: result.motivationScore });
-        showToast(`Nilai motivasi harian tersimpan: ${result.motivationScore.score}%.`);
+        showToast(`Survei motivasi harian tersimpan: ${result.motivationScore.score}%.`);
       } catch (error) {
         showToast(error.message);
       }
@@ -453,7 +683,7 @@
   async function initDashboard() {
     const data = await api("/api/patient/dashboard");
     updatePatientHeader(data.patient);
-    setTextByCurrentText('"Setiap obat yang diminum hari ini adalah langkah menuju kesembuhan"', `"${data.motivation}"`);
+    setTextByCurrentText('"Setiap obat yang diminum hari ini adalah langkah menuju kesembuhan"', currentLanguage() === "en" ? '"Every dose you take today is a step toward recovery."' : `"${data.motivation}"`);
 
     const adherence = data.adherence || { score: data.patient.adherenceScore || 0, confirmedDays: 0, treatmentDays: data.patient.treatmentDay || 1 };
     const adherenceCard = textIncludes("Kepatuhan Pengobatan")?.closest(".rounded-xl");
@@ -473,9 +703,9 @@
     const chatAccess = document.querySelector("[data-ai-assistant-card]") || textIncludes("Tanya Asisten")?.closest("section");
     if (chatAccess) {
       const title = chatAccess.querySelector("h3");
-      if (title) title.textContent = "Tanya Asisten ASET-TB";
+      if (title) title.textContent = t("Tanya Asisten ASET-TB");
       const description = chatAccess.querySelector("p.font-body-md, p");
-      if (description) description.textContent = "Motivasi dan informasi TB dari AI ASET.";
+      if (description) description.textContent = t("Motivasi dan informasi TB dari AI ASET.");
       chatAccess.classList.add("cursor-pointer");
       chatAccess.setAttribute("role", "button");
       chatAccess.setAttribute("tabindex", "0");
@@ -531,14 +761,14 @@
     document.getElementById("profile-email").textContent = user.email || patient.googleEmail || "-";
     document.getElementById("profile-mrn").textContent = patient.medicalRecordNumber || "-";
     document.getElementById("profile-phase").textContent = patient.phase || "-";
-    document.getElementById("profile-day").textContent = `${adherence.confirmedDays || 0}/${adherence.treatmentDays || 0} hari dikonfirmasi`;
-    document.getElementById("profile-self").textContent = selfToday.submittedToday ? `${selfToday.score}%` : "Belum diisi hari ini";
+    document.getElementById("profile-day").textContent = tf("{confirmed}/{total} hari dikonfirmasi", "{confirmed}/{total} days confirmed", { confirmed: adherence.confirmedDays || 0, total: adherence.treatmentDays || 0 });
+    document.getElementById("profile-self").textContent = selfToday.submittedToday ? `${selfToday.score}%` : t("Belum diisi hari ini");
     const adherenceNode = document.getElementById("profile-adherence");
     if (adherenceNode) adherenceNode.textContent = `${adherence.score ?? patient.adherenceScore ?? 0}%`;
     const estimatedNode = document.getElementById("profile-estimated");
-    if (estimatedNode) estimatedNode.textContent = adherence.estimatedEndDate ? formatDateId(adherence.estimatedEndDate) : "Belum ada jadwal";
+    if (estimatedNode) estimatedNode.textContent = adherence.estimatedEndDate ? formatDateId(adherence.estimatedEndDate) : t("Belum ada jadwal");
     const motivationNode = document.getElementById("profile-motivation");
-    if (motivationNode) motivationNode.textContent = motivationToday.submittedToday ? `${motivationToday.score}%` : "Belum dinilai hari ini";
+    if (motivationNode) motivationNode.textContent = motivationToday.submittedToday ? `${motivationToday.score}%` : t("Belum dinilai hari ini");
 
     const avatar = document.getElementById("profile-avatar");
     if (avatar && (patient.avatar || user.avatar)) {
@@ -652,11 +882,11 @@
   }
 
   function scheduleDayName(value) {
-    return new Intl.DateTimeFormat("id-ID", { weekday: "short" }).format(new Date(`${value}T00:00:00`)).toUpperCase().replace(".", "");
+    return new Intl.DateTimeFormat(currentLanguage() === "en" ? "en-US" : "id-ID", { weekday: "short" }).format(new Date(`${value}T00:00:00`)).toUpperCase().replace(".", "");
   }
 
   function scheduleMonthYear(value) {
-    return new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(new Date(`${value}T00:00:00`));
+    return new Intl.DateTimeFormat(currentLanguage() === "en" ? "en-US" : "id-ID", { month: "long", year: "numeric" }).format(new Date(`${value}T00:00:00`));
   }
 
   function nearestScheduledDate(dates) {
@@ -677,8 +907,8 @@
     section.innerHTML = `
       <div class="flex justify-between items-center gap-sm">
         <div>
-          <h2 class="font-headline-sm text-headline-sm text-on-surface">Jadwal Pengobatan</h2>
-          <p class="text-sm text-on-surface-variant">Tanggal yang tampil adalah jadwal yang sudah dibuat perawat.</p>
+          <h2 class="font-headline-sm text-headline-sm text-on-surface">${t("Jadwal Pengobatan")}</h2>
+          <p class="text-sm text-on-surface-variant">${t("Tanggal yang tampil adalah jadwal yang sudah dibuat perawat.", "The displayed dates are schedules created by the nurse.")}</p>
         </div>
         <div class="flex items-center gap-xs text-primary font-label-md capitalize">
           <span class="material-symbols-outlined text-[18px]">calendar_month</span>
@@ -694,7 +924,7 @@
               <span class="font-headline-sm">${new Date(`${item.date}T00:00:00`).getDate()}</span>
               <span class="text-[10px] ${item.pending ? "text-tertiary" : "text-secondary"}">${item.confirmed}/${item.total}</span>
             </button>`).join("") : `
-            <div class="py-sm text-center text-on-surface-variant">Belum ada tanggal jadwal dari perawat.</div>`}
+            <div class="py-sm text-center text-on-surface-variant">${t("Belum ada tanggal jadwal dari perawat.", "There are no scheduled dates from the nurse yet.")}</div>`}
         </div>
         <button type="button" class="material-symbols-outlined text-on-surface-variant p-2 rounded-full hover:bg-surface-container" data-schedule-next ${dates.findIndex(item => item.date === selectedDate) >= dates.length - 1 ? "disabled" : ""}>chevron_right</button>
       </div>`;
@@ -721,8 +951,8 @@
           </div>
           <span class="${medicationStatusClass(med.status)} text-[12px] px-3 py-1 rounded-full font-bold uppercase tracking-wider">${statusLabel(med.status)}</span>
         </div>
-        ${med.confirmedAt ? `<div class="flex flex-col gap-xs bg-surface-container-low p-sm rounded-lg border border-secondary/20"><div class="flex items-center gap-sm"><span class="material-symbols-outlined text-secondary">check_circle</span><span class="text-on-surface font-label-md">Sudah diminum pukul ${med.confirmedAt}</span></div>${med.confirmationVideoPath ? `<a class="text-primary font-label-md underline" href="/${med.confirmationVideoPath}" target="_blank">Lihat video konfirmasi</a>` : ""}</div>` : ""}
-        ${canConfirm ? `<button data-confirm-medication="${med.id}" class="w-full h-14 bg-primary text-on-primary rounded-xl font-bold flex items-center justify-center gap-sm shadow-md active:scale-[0.98] transition-transform"><span class="material-symbols-outlined">videocam</span>Rekam & Konfirmasi Minum Obat</button>` : ""}
+        ${med.confirmedAt ? `<div class="flex flex-col gap-xs bg-surface-container-low p-sm rounded-lg border border-secondary/20"><div class="flex items-center gap-sm"><span class="material-symbols-outlined text-secondary">check_circle</span><span class="text-on-surface font-label-md">${tf("Sudah diminum pukul {time}", "Taken at {time}", { time: med.confirmedAt })}</span></div>${med.confirmationVideoPath ? `<a class="text-primary font-label-md underline" href="/${med.confirmationVideoPath}" target="_blank">${t("Lihat video konfirmasi")}</a>` : ""}</div>` : ""}
+        ${canConfirm ? `<button data-confirm-medication="${med.id}" class="w-full h-14 bg-primary text-on-primary rounded-xl font-bold flex items-center justify-center gap-sm shadow-md active:scale-[0.98] transition-transform"><span class="material-symbols-outlined">videocam</span>${t("Rekam & Konfirmasi Minum Obat")}</button>` : ""}
       </div>`;
   }
 
@@ -742,11 +972,11 @@
           <div class="flex items-center gap-sm">
             <span class="material-symbols-outlined text-secondary">medication</span>
             <div>
-              <h3 class="font-headline-sm text-headline-sm">Jadwal Terjadwal</h3>
-              <p class="text-sm text-on-surface-variant">${formatDateId(selectedDate)} • ${meds.length} jadwal obat</p>
+              <h3 class="font-headline-sm text-headline-sm">${t("Jadwal Terjadwal")}</h3>
+              <p class="text-sm text-on-surface-variant">${tf("{date} • {count} jadwal obat", "{date} • {count} medication schedules", { date: formatDateId(selectedDate), count: meds.length })}</p>
             </div>
           </div>
-          <div class="space-y-md" id="patient-medication-list">${meds.length ? meds.map(medicationCard).join("") : `<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md text-on-surface-variant">Belum ada jadwal obat pada tanggal ini.</div>`}</div>
+          <div class="space-y-md" id="patient-medication-list">${meds.length ? meds.map(medicationCard).join("") : `<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md text-on-surface-variant">${t("Belum ada jadwal obat pada tanggal ini.")}</div>`}</div>
         `;
       }
       bindScheduleActions();
@@ -791,7 +1021,7 @@
 
 
   function chatTime(value) {
-    return new Intl.DateTimeFormat("id-ID", {
+    return new Intl.DateTimeFormat(currentLanguage() === "en" ? "en-US" : "id-ID", {
       hour: "2-digit",
       minute: "2-digit",
       timeZone: "Asia/Jakarta"
@@ -824,12 +1054,20 @@
     if (!chatList || !textarea || !sendButton) return;
 
     const introTitle = textIncludes("Asisten Kesehatan TB");
-    if (introTitle) introTitle.textContent = "Asisten AI ASET";
+    if (introTitle) introTitle.textContent = t("Asisten AI ASET", "ASET AI Assistant");
     const introText = introTitle?.closest("section")?.querySelector("p");
-    if (introText) introText.textContent = "AI ASET siap memberi motivasi harian dan informasi TB yang aman. Untuk keluhan berat, tetap hubungi perawat atau dokter.";
+    if (introText) introText.textContent = t(
+      "AI ASET siap memberi motivasi harian dan informasi TB yang aman. Untuk keluhan berat, tetap hubungi perawat atau dokter.",
+      "ASET AI is ready to provide daily motivation and safe TB information. For severe symptoms, contact your nurse or doctor."
+    );
 
     const chips = Array.from(document.querySelectorAll("button")).filter(button => button.textContent.trim().endsWith("?"));
-    const chipLabels = [
+    const chipLabels = currentLanguage() === "en" ? [
+      "Give me motivation to take my medication today",
+      "Explain important information about TB",
+      "Why must TB medication be taken regularly?",
+      "What side effects should I watch for?"
+    ] : [
       "Beri saya motivasi untuk minum obat hari ini",
       "Jelaskan informasi penting tentang TB",
       "Kenapa obat TB harus diminum teratur?",
@@ -900,7 +1138,7 @@
 
   function formatDateId(value) {
     if (!value) return "-";
-    return new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${value}T00:00:00`));
+    return new Intl.DateTimeFormat(currentLanguage() === "en" ? "en-US" : "id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${value}T00:00:00`));
   }
 
   function adminMedicationTone(status) {
@@ -1294,6 +1532,7 @@
   function runFeature(name, task) {
     Promise.resolve()
       .then(task)
+      .then(() => translateTextNodes())
       .catch(error => {
         console.error(`${name} gagal:`, error);
         showToast(`${name} belum bisa dimuat: ${error.message}`);
@@ -1302,6 +1541,7 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     const path = window.location.pathname;
+    initLanguage();
     runFeature("Navigasi", bindNavigation);
     if (!["/", "/landing", "/nurse"].includes(path)) runFeature("Profil Google", initPatientIdentity);
     if (path === "/" || path === "/landing") runFeature("Login Google", initLanding);
