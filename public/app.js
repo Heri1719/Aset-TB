@@ -228,6 +228,8 @@
   }
 
   function bindNavigation() {
+    const currentPath = window.location.pathname;
+    if (currentPath === "/nurse" || currentPath.includes("dashboard_perawat")) return;
     initPatientDrawer();
     document.querySelectorAll("[data-nav]").forEach(element => {
       const raw = element.getAttribute("data-nav");
