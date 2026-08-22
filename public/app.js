@@ -1587,9 +1587,10 @@
       link.addEventListener("click", async event => {
         event.preventDefault();
         const label = link.textContent.trim().toLowerCase();
-        if (label.includes("sign out")) {
+        const icon = link.querySelector(".material-symbols-outlined")?.textContent.trim().toLowerCase();
+        if (label.includes("sign out") || label.includes("keluar") || icon === "logout") {
           await api("/api/auth/logout", { method: "POST", body: "{}" });
-          window.location.href = "/";
+          window.location.href = "/dashboard";
           return;
         }
         if (label.includes("overview")) await render("overview");
