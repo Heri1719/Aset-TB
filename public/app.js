@@ -168,11 +168,11 @@
     text.className = "whitespace-nowrap";
 
     const select = document.createElement("select");
-    select.className = "bg-transparent text-on-surface font-label-md outline-none cursor-pointer";
+    select.className = "bg-transparent text-on-surface font-label-md outline-none cursor-pointer w-14 text-center";
     select.setAttribute("aria-label", t("Pilih Bahasa", "Language"));
     select.innerHTML = `
-      <option value="id">🇮🇩 ${t("Bahasa Indonesia", "Indonesian")}</option>
-      <option value="en">🇬🇧 ${t("Bahasa Inggris", "English")}</option>
+      <option value="id">🇮🇩</option>
+      <option value="en">🇬🇧</option>
     `;
     select.value = currentLanguage();
     select.addEventListener("change", () => {
