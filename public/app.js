@@ -2,6 +2,16 @@
   const LANGUAGE_STORAGE_KEY = "aset-tb-language";
   const dictionary = {
     en: {
+      "ASET-TB - Pendamping Kesembuhan Anda": "ASET-TB - Your Recovery Companion",
+      "Pilih Bahasa": "Language",
+      "Bahasa Indonesia": "Indonesian",
+      "Bahasa Inggris": "English",
+      "Mitra Kesehatan Terpercaya": "Trusted Health Partner",
+      "ASET-TB: Pendamping Kesembuhan Anda": "ASET-TB: Your Recovery Companion",
+      "Pendamping Kesembuhan Anda": "Your Recovery Companion",
+      "Kepatuhan konsumsi obat adalah kunci utama kesembuhan Tuberkulosis. ASET-TB hadir untuk menemani perjalanan kesehatan Anda dengan pengingat cerdas, edukasi mendalam, dan dukungan penuh setiap hari.": "Medication adherence is a key part of tuberculosis recovery. ASET-TB supports your health journey with smart reminders, clear education, and daily encouragement.",
+      "Masuk dengan Google": "Sign in with Google",
+      "Lanjut ke Dashboard": "Continue to Dashboard",
       "Jadwal Pengobatan": "Medication Schedule",
       "Obat Hari Ini": "Today's Medication",
       "Jadwal Terjadwal": "Scheduled Medication",
@@ -17,10 +27,9 @@
       "Catatan Harian": "Daily Notes",
       "Profil": "Profile",
       "Keluar": "Sign Out",
-      "Home": "Home",
-      "Schedule": "Schedule",
-      "Assistant": "Assistant",
-      "Profile": "Profile",
+      "Beranda": "Home",
+      "Jadwal": "Schedule",
+      "Asisten": "Assistant",
       "Dashboard Perawat": "Nurse Dashboard",
       "Patient List": "Patient List",
       "Medication Schedule": "Medication Schedule",
@@ -143,36 +152,41 @@
   }
 
   function mountLanguageSelector() {
-    if (document.querySelector("[data-language-toggle]")) return;
+    if (document.querySelector("[data-language-selector]")) return;
     const headerActions = document.querySelector("header .flex.items-center.gap-2")
       || document.querySelector("header .flex.items-center:last-child")
       || document.querySelector("header");
     if (!headerActions) return;
     headerActions.classList.add("shrink-0");
 
-    const button = document.createElement("button");
-    button.type = "button";
-    button.dataset.languageToggle = "true";
-    button.className = "h-9 w-9 shrink-0 rounded-full border border-outline-variant bg-surface-container-lowest text-lg leading-none shadow-sm transition-colors hover:bg-primary-fixed active:scale-95";
+    const wrapper = document.createElement("label");
+    wrapper.dataset.languageSelector = "true";
+    wrapper.className = "inline-flex items-center gap-2 rounded-full border border-outline-variant bg-surface-container-lowest px-3 py-2 text-sm font-label-md text-on-surface shadow-sm";
 
-    function updateLanguageButton() {
-      const language = currentLanguage();
-      button.textContent = language === "id" ? "🇮🇩" : "🇬🇧";
-      button.title = language === "id" ? "Ganti ke English" : "Switch to Bahasa Indonesia";
-      button.setAttribute("aria-label", button.title);
-    }
+    const text = document.createElement("span");
+    text.textContent = t("Pilih Bahasa", "Language");
+    text.className = "whitespace-nowrap";
 
-    updateLanguageButton();
-    button.addEventListener("click", () => {
-      const nextLanguage = currentLanguage() === "id" ? "en" : "id";
-      localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage);
+    const select = document.createElement("select");
+    select.className = "bg-transparent text-on-surface font-label-md outline-none cursor-pointer";
+    select.setAttribute("aria-label", t("Pilih Bahasa", "Language"));
+    select.innerHTML = `
+      <option value="id">🇮🇩 ${t("Bahasa Indonesia", "Indonesian")}</option>
+      <option value="en">🇬🇧 ${t("Bahasa Inggris", "English")}</option>
+    `;
+    select.value = currentLanguage();
+    select.addEventListener("change", () => {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, select.value === "en" ? "en" : "id");
       window.location.reload();
     });
-    headerActions.prepend(button);
+
+    wrapper.append(text, select);
+    headerActions.prepend(wrapper);
   }
 
   function initLanguage() {
     document.documentElement.lang = currentLanguage();
+    if (document.title) document.title = t(document.title);
     mountLanguageSelector();
     translateTextNodes();
   }
@@ -316,7 +330,7 @@
   }
 
   function formatMedication(medication) {
-    if (!medication) return "Tidak ada jadwal";
+    if (!medication) return t("Tidak ada jadwal", "No schedule");
     const parts = [medication.name, medication.form ? `(${medication.form})` : ""].filter(Boolean);
     return parts.join(" ");
   }
@@ -334,10 +348,10 @@
 
   function patientRoutes() {
     return [
-      { label: "Home", path: "/dashboard", icon: "home" },
-      { label: "Schedule", path: "/schedule", icon: "pill" },
-      { label: "Assistant", path: "/chatbot", icon: "smart_toy" },
-      { label: "Profile", path: "/profile", icon: "person" }
+      { label: t("Beranda", "Home"), path: "/dashboard", icon: "home" },
+      { label: t("Jadwal", "Schedule"), path: "/schedule", icon: "pill" },
+      { label: t("Asisten", "Assistant"), path: "/chatbot", icon: "smart_toy" },
+      { label: t("Profil", "Profile"), path: "/profile", icon: "person" }
     ];
   }
 
@@ -465,7 +479,7 @@
   ];
 
   function nextMedicationText(medication) {
-    if (!medication) return { time: "-", label: "Tidak ada jadwal" };
+    if (!medication) return { time: "-", label: t("Tidak ada jadwal", "No schedule") };
     const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
     const dateLabel = medication.takenDate && medication.takenDate !== today ? ` • ${formatDateId(medication.takenDate)}` : "";
     return {
