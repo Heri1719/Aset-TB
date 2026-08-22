@@ -646,7 +646,14 @@
   }
 
 
+  function isLocalHost() {
+    return ["127.0.0.1", "localhost", "::1"].includes(window.location.hostname);
+  }
+
   async function initLanding() {
+    document.querySelectorAll("[data-admin-entry]").forEach(link => {
+      if (isLocalHost()) link.hidden = false;
+    });
     const label = textIncludes("Masuk dengan Google");
     const button = document.querySelector("[data-google-login]") || label?.closest("a, button");
     if (!button) return;
@@ -1272,15 +1279,69 @@
     URL.revokeObjectURL(link.href);
   }
 
+  function renderNurseLogin(errorMessage = "") {
+    const main = document.querySelector("main") || document.body;
+    main.innerHTML = `
+      <section class="min-h-[calc(100vh-96px)] flex items-center justify-center p-md bg-surface-container-lowest">
+        <form id="nurse-login-form" class="w-full max-w-md bg-surface-container-lowest border border-outline-variant/40 rounded-xl shadow-lg p-lg space-y-md">
+          <div class="space-y-xs">
+            <div class="w-14 h-14 rounded-xl bg-primary text-on-primary flex items-center justify-center mb-sm">
+              <span class="material-symbols-outlined">admin_panel_settings</span>
+            </div>
+            <h1 class="font-headline-md text-headline-md text-on-surface">Login Admin/Perawat</h1>
+            <p class="text-on-surface-variant">Masuk menggunakan username dan password admin yang sudah dikonfigurasi.</p>
+          </div>
+          <div data-login-error class="rounded-lg border border-error/30 bg-error/10 text-error px-4 py-3 text-sm" ${errorMessage ? "" : "hidden"}>${errorMessage}</div>
+          <label class="block space-y-xs">
+            <span class="font-label-md text-on-surface">Username / Email</span>
+            <input name="username" type="text" autocomplete="username" required value="${isLocalHost() ? "hcahyanto@ikbis.ac.id" : ""}" class="w-full h-12 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 focus:outline-none focus:ring-2 focus:ring-primary" />
+          </label>
+          <label class="block space-y-xs">
+            <span class="font-label-md text-on-surface">Password</span>
+            <input name="password" type="password" autocomplete="current-password" required class="w-full h-12 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 focus:outline-none focus:ring-2 focus:ring-primary" />
+          </label>
+          <button type="submit" class="w-full h-12 rounded-lg bg-primary text-on-primary font-button-text shadow-md active:scale-95 transition-all">Masuk Dashboard Admin</button>
+          <a href="/" class="block text-center text-primary font-label-md">Kembali ke halaman pasien</a>
+        </form>
+      </section>
+    `;
+    return new Promise(resolve => {
+      const form = document.getElementById("nurse-login-form");
+      form?.addEventListener("submit", async event => {
+        event.preventDefault();
+        const button = form.querySelector('button[type="submit"]');
+        const formData = new FormData(form);
+        button.disabled = true;
+        button.textContent = "Memeriksa...";
+        try {
+          await api("/api/auth/nurse-login", {
+            method: "POST",
+            body: JSON.stringify({
+              username: formData.get("username"),
+              password: formData.get("password")
+            })
+          });
+          resolve(api("/api/nurse/overview"));
+        } catch (error) {
+          const alert = form.querySelector("[data-login-error]");
+          if (alert) {
+            alert.textContent = error.message;
+            alert.hidden = false;
+          }
+          button.disabled = false;
+          button.textContent = "Masuk Dashboard Admin";
+        }
+      });
+    });
+  }
+
   async function initNurse() {
     let data;
     try {
       data = await api("/api/nurse/overview", { redirectOnAuth: false });
     } catch (error) {
-      const email = window.prompt("Masukkan email admin/perawat:", "hcahyanto@ikbis.ac.id");
-      if (!email) throw error;
-      await api("/api/auth/nurse-login", { method: "POST", body: JSON.stringify({ email }) });
-      data = await api("/api/nurse/overview");
+      data = await renderNurseLogin();
+      if (!data) return;
     }
 
     const shell = nurseShell();

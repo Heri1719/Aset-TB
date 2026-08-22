@@ -18,6 +18,8 @@ const port = Number(process.env.PORT || 3000);
 const host = process.env.HOST || "127.0.0.1";
 const sessionSecret = process.env.SESSION_SECRET || "aset-tb-dev-session-secret-change-me";
 const appOrigin = process.env.APP_ORIGIN || `http://${host}:${port}`;
+const adminUsername = process.env.ADMIN_USERNAME || process.env.ADMIN_EMAIL || "hcahyanto@ikbis.ac.id";
+const adminPassword = process.env.ADMIN_PASSWORD;
 
 const config = {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
@@ -80,6 +82,39 @@ function isConfigured(value, placeholder) {
 function redirect(res, location, headers = {}) {
   res.writeHead(302, { location, ...headers });
   res.end();
+}
+
+function isLocalRequest(req) {
+  const requestHost = String(req.headers.host || "").split(":")[0];
+  const forwardedHost = String(req.headers["x-forwarded-host"] || "").split(":")[0];
+  return ["127.0.0.1", "localhost", "::1"].includes(requestHost)
+    || ["127.0.0.1", "localhost", "::1"].includes(forwardedHost);
+}
+
+function scryptAsync(password, salt) {
+  return new Promise((resolve, reject) => {
+    crypto.scrypt(password, salt, 64, (error, derivedKey) => {
+      if (error) reject(error);
+      else resolve(derivedKey);
+    });
+  });
+}
+
+async function verifyPassword(password, storedHash) {
+  if (!password || !storedHash) return false;
+  const [algorithm, salt, hash] = String(storedHash).split("$");
+  if (algorithm !== "scrypt" || !salt || !hash) return false;
+  const expected = Buffer.from(hash, "hex");
+  const actual = await scryptAsync(password, salt);
+  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+}
+
+async function verifyNursePassword(password, user) {
+  if (user?.passwordHash) return verifyPassword(password, user.passwordHash);
+  if (!adminPassword) return false;
+  const actual = Buffer.from(String(password || ""));
+  const expected = Buffer.from(String(adminPassword));
+  return actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
 }
 
 function readBody(req) {
@@ -281,12 +316,29 @@ async function handleAuth(req, res, url) {
 
   if (req.method === "POST" && url.pathname === "/api/auth/nurse-login") {
     const body = await readBody(req);
-    const user = await store.findNurseByEmail(body.email);
+    const username = String(body.username || body.email || "").trim().toLowerCase();
+    const password = String(body.password || "");
+    const user = await store.findNurseByEmail(username);
     if (!user) {
-      sendJson(res, 401, { error: "Akun perawat tidak ditemukan" });
+      sendJson(res, 401, { error: "Username atau password admin salah" });
       return true;
     }
-    sendJson(res, 200, { user }, {
+    if (username !== String(adminUsername).trim().toLowerCase()) {
+      sendJson(res, 403, { error: "Akun ini tidak diizinkan masuk dashboard admin" });
+      return true;
+    }
+    if (!adminPassword && !user.passwordHash) {
+      sendJson(res, 503, {
+        error: "Login admin belum dikonfigurasi. Isi ADMIN_USERNAME dan ADMIN_PASSWORD di environment server."
+      });
+      return true;
+    }
+    if (!(await verifyNursePassword(password, user))) {
+      sendJson(res, 401, { error: "Username atau password admin salah" });
+      return true;
+    }
+    const { passwordHash, ...safeUser } = user;
+    sendJson(res, 200, { user: safeUser, local: isLocalRequest(req) }, {
       "set-cookie": createSessionCookie({ userId: user.id, role: "nurse", patientId: null }, sessionSecret)
     });
     return true;
@@ -324,7 +376,8 @@ async function handleApi(req, res, url) {
     }
     const user = await store.findUserById(session.userId);
     const patient = session.patientId ? await store.getPatientById(session.patientId) : await store.getPatientForUser(session.userId);
-    sendJson(res, 200, { authenticated: true, user, patient });
+    const { passwordHash, ...safeUser } = user || {};
+    sendJson(res, 200, { authenticated: true, user: safeUser, patient });
     return;
   }
 
