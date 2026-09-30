@@ -35,7 +35,7 @@ const config = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   OPENAI_MODEL: process.env.OPENAI_MODEL || "gpt-4.1-mini",
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-  GEMINI_MODEL_PRIMARY: process.env.GEMINI_MODEL_PRIMARY || process.env.GEMINI_MODEL || "gemini-2.5-flash-lite",
+  GEMINI_MODEL_PRIMARY: process.env.GEMINI_MODEL_PRIMARY || process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
   GEMINI_MODEL_FALLBACK: process.env.GEMINI_MODEL_FALLBACK || "gemini-3.1-flash-lite",
   GEMINI_TEMPERATURE: readNumberEnv("GEMINI_TEMPERATURE", 0.2, { min: 0, max: 2 }),
   GEMINI_TOP_P: readNumberEnv("GEMINI_TOP_P", 0.9, { min: 0, max: 1 }),
