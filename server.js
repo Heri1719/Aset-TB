@@ -6,7 +6,7 @@ const crypto = require("crypto");
 const { clearSessionCookie, createSessionCookie, readSession, requireSession } = require("./lib/auth");
 const { loadEnv } = require("./lib/env");
 const { exchangeCodeForProfile, googleAuthUrl } = require("./lib/google");
-const { askTbAssistant } = require("./lib/openai-chatbot");
+const { askTbAssistant, DEFAULT_GEMINI_PRIMARY_MODEL, DEFAULT_GEMINI_FALLBACK_MODEL } = require("./lib/openai-chatbot");
 const { isEmailConfigured, sendSmtpMail } = require("./lib/email");
 const { PostgresStore } = require("./lib/store");
 
@@ -35,11 +35,12 @@ const config = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   OPENAI_MODEL: process.env.OPENAI_MODEL || "gpt-4.1-mini",
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-  GEMINI_MODEL_PRIMARY: process.env.GEMINI_MODEL_PRIMARY || process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
-  GEMINI_MODEL_FALLBACK: process.env.GEMINI_MODEL_FALLBACK || "gemini-3.1-flash-lite",
+  GEMINI_MODEL_PRIMARY: process.env.GEMINI_MODEL_PRIMARY || DEFAULT_GEMINI_PRIMARY_MODEL,
+  GEMINI_MODEL_FALLBACK: process.env.GEMINI_MODEL_FALLBACK || DEFAULT_GEMINI_FALLBACK_MODEL,
   GEMINI_TEMPERATURE: readNumberEnv("GEMINI_TEMPERATURE", 0.2, { min: 0, max: 2 }),
   GEMINI_TOP_P: readNumberEnv("GEMINI_TOP_P", 0.9, { min: 0, max: 1 }),
   GEMINI_MAX_OUTPUT_TOKENS: readNumberEnv("GEMINI_MAX_OUTPUT_TOKENS", 250, { min: 1, max: 8192, integer: true }),
+  GEMINI_TIMEOUT_MS: readNumberEnv("GEMINI_TIMEOUT_MS", 15000, { min: 1000, max: 60000, integer: true }),
   EMAIL_NOTIFICATIONS_ENABLED: process.env.EMAIL_NOTIFICATIONS_ENABLED !== "false",
   EMAIL_APP_URL: process.env.EMAIL_APP_URL || appOrigin,
   SMTP: {
@@ -372,6 +373,7 @@ async function handleApi(req, res, url) {
         && isConfigured(config.GOOGLE_CLIENT_SECRET, "your-google-client-secret"),
       openAi: isConfigured(config.OPENAI_API_KEY, "sk-your-openai-key"),
       gemini: isConfigured(config.GEMINI_API_KEY, "your-gemini-api-key"),
+      geminiModels: { primary: config.GEMINI_MODEL_PRIMARY, fallback: config.GEMINI_MODEL_FALLBACK },
       database: true,
       emailNotifications: config.EMAIL_NOTIFICATIONS_ENABLED && isEmailConfigured(config.SMTP),
       redirectUri: config.GOOGLE_REDIRECT_URI
@@ -631,6 +633,7 @@ async function handleApi(req, res, url) {
       geminiTemperature: config.GEMINI_TEMPERATURE,
       geminiTopP: config.GEMINI_TOP_P,
       geminiMaxOutputTokens: config.GEMINI_MAX_OUTPUT_TOKENS,
+      geminiTimeoutMs: config.GEMINI_TIMEOUT_MS,
       message,
       history,
       patient
@@ -641,7 +644,7 @@ async function handleApi(req, res, url) {
       message: answer.message,
       topic: answer.topic
     });
-    sendJson(res, 201, { messages: [userMessage, assistantMessage], provider: answer.provider });
+    sendJson(res, 201, { messages: [userMessage, assistantMessage], provider: answer.provider, model: answer.model });
     return;
   }
 
