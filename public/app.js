@@ -165,10 +165,11 @@
 
     const text = document.createElement("span");
     text.textContent = t("Pilih Bahasa", "Language");
-    text.className = "whitespace-nowrap";
+    text.className = "hidden sm:inline whitespace-nowrap";
 
     const select = document.createElement("select");
-    select.className = "bg-transparent text-on-surface font-label-md outline-none cursor-pointer w-14 text-center";
+    // The Tailwind forms plugin gives <select> 12px + 40px padding; at the old fixed w-14 that left ~2px, so the flag was clipped.
+    select.className = "bg-transparent text-on-surface text-lg leading-none outline-none cursor-pointer border-0 rounded-full py-0 pl-1 pr-8 focus:ring-0";
     select.setAttribute("aria-label", t("Pilih Bahasa", "Language"));
     select.innerHTML = `
       <option value="id">🇮🇩</option>
@@ -1076,6 +1077,8 @@
     const sendButton = document.querySelector(".fixed button.bg-primary");
     if (!chatList || !textarea || !sendButton) return;
 
+    textarea.placeholder = t("Ketik pesan Anda di sini...", "Type your message here...");
+
     const introTitle = textIncludes("Asisten Kesehatan TB");
     if (introTitle) introTitle.textContent = t("Asisten AI ASET", "ASET AI Assistant");
     const introText = introTitle?.closest("section")?.querySelector("p");
@@ -1114,7 +1117,7 @@
       try {
         const result = await api("/api/chat", {
           method: "POST",
-          body: JSON.stringify({ message: content })
+          body: JSON.stringify({ message: content, language: currentLanguage() })
         });
         result.messages.forEach(item => chatList.appendChild(renderChatMessage(item)));
         window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
@@ -1130,18 +1133,16 @@
         send(textarea.value);
       }
     });
-    document.querySelectorAll("button").forEach(button => {
-      const text = button.textContent.trim();
-      if (text.endsWith("?") || text.toLowerCase().includes("motivasi") || text.toLowerCase().includes("informasi")) {
-        button.addEventListener("click", () => send(button.textContent.trim()));
-      }
-    });
+    chips.forEach(button => button.addEventListener("click", () => send(button.textContent.trim())));
     await refresh();
 
     const intent = new URLSearchParams(window.location.search).get("intent");
     if (intent === "motivation" && !sessionStorage.getItem("aset-ai-motivation-opened")) {
       sessionStorage.setItem("aset-ai-motivation-opened", "1");
-      await send("Beri saya motivasi hari ini dan informasi singkat agar saya semangat menjalani pengobatan TB.");
+      await send(t(
+        "Beri saya motivasi hari ini dan informasi singkat agar saya semangat menjalani pengobatan TB.",
+        "Give me some motivation for today and a short tip to help me keep going with my TB treatment."
+      ));
     }
   }
 

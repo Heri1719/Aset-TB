@@ -634,6 +634,7 @@ async function handleApi(req, res, url) {
       geminiTopP: config.GEMINI_TOP_P,
       geminiMaxOutputTokens: config.GEMINI_MAX_OUTPUT_TOKENS,
       geminiTimeoutMs: config.GEMINI_TIMEOUT_MS,
+      language: body.language,
       message,
       history,
       patient
