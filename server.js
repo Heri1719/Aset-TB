@@ -21,6 +21,13 @@ const appOrigin = process.env.APP_ORIGIN || `http://${host}:${port}`;
 const adminUsername = process.env.ADMIN_USERNAME || process.env.ADMIN_EMAIL || "hcahyanto@ikbis.ac.id";
 const adminPassword = process.env.ADMIN_PASSWORD;
 
+function readNumberEnv(name, fallback, { min, max, integer = false }) {
+  const parsed = Number(process.env[name]);
+  if (!Number.isFinite(parsed)) return fallback;
+  const bounded = Math.min(max, Math.max(min, parsed));
+  return integer ? Math.round(bounded) : bounded;
+}
+
 const config = {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
@@ -28,7 +35,11 @@ const config = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   OPENAI_MODEL: process.env.OPENAI_MODEL || "gpt-4.1-mini",
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-  GEMINI_MODEL: process.env.GEMINI_MODEL || "gemini-2.0-flash",
+  GEMINI_MODEL_PRIMARY: process.env.GEMINI_MODEL_PRIMARY || process.env.GEMINI_MODEL || "gemini-2.5-flash-lite",
+  GEMINI_MODEL_FALLBACK: process.env.GEMINI_MODEL_FALLBACK || "gemini-3.1-flash-lite",
+  GEMINI_TEMPERATURE: readNumberEnv("GEMINI_TEMPERATURE", 0.2, { min: 0, max: 2 }),
+  GEMINI_TOP_P: readNumberEnv("GEMINI_TOP_P", 0.9, { min: 0, max: 1 }),
+  GEMINI_MAX_OUTPUT_TOKENS: readNumberEnv("GEMINI_MAX_OUTPUT_TOKENS", 250, { min: 1, max: 8192, integer: true }),
   EMAIL_NOTIFICATIONS_ENABLED: process.env.EMAIL_NOTIFICATIONS_ENABLED !== "false",
   EMAIL_APP_URL: process.env.EMAIL_APP_URL || appOrigin,
   SMTP: {
@@ -615,7 +626,11 @@ async function handleApi(req, res, url) {
       apiKey: config.OPENAI_API_KEY,
       model: config.OPENAI_MODEL,
       geminiApiKey: config.GEMINI_API_KEY,
-      geminiModel: config.GEMINI_MODEL,
+      geminiPrimaryModel: config.GEMINI_MODEL_PRIMARY,
+      geminiFallbackModel: config.GEMINI_MODEL_FALLBACK,
+      geminiTemperature: config.GEMINI_TEMPERATURE,
+      geminiTopP: config.GEMINI_TOP_P,
+      geminiMaxOutputTokens: config.GEMINI_MAX_OUTPUT_TOKENS,
       message,
       history,
       patient
