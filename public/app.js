@@ -31,12 +31,36 @@
       "Jadwal": "Schedule",
       "Asisten": "Assistant",
       "Dashboard Perawat": "Nurse Dashboard",
-      "Patient List": "Patient List",
-      "Medication Schedule": "Medication Schedule",
-      "Assessment Results": "Assessment Results",
-      "Education Content": "Education Content",
-      "Motivation Messages": "Motivation Messages",
-      "Settings": "Settings",
+      "ASET-TB - Dashboard Perawat": "ASET-TB - Nurse Dashboard",
+      "Ringkasan": "Overview",
+      "Daftar Pasien": "Patient List",
+      "Hasil Penilaian": "Assessment Results",
+      "Konten Edukasi": "Education Content",
+      "Pesan Motivasi": "Motivation Messages",
+      "Pengaturan": "Settings",
+      "ID Perawat: NS-2026-01": "Nurse ID: NS-2026-01",
+      "Cari nama atau ID pasien...": "Search patient name or ID...",
+      "Pasien": "Patients",
+      "Peringatan": "Alerts",
+      "Silakan login terlebih dahulu": "Please sign in first",
+      "Username atau password admin salah": "Incorrect admin username or password",
+      "Akun ini tidak diizinkan masuk dashboard admin": "This account is not allowed to open the admin dashboard",
+      "Login admin belum dikonfigurasi. Isi ADMIN_USERNAME dan ADMIN_PASSWORD di environment server.": "Admin sign-in is not configured. Set ADMIN_USERNAME and ADMIN_PASSWORD in the server environment.",
+      "Hanya perawat yang dapat membuka dashboard ini": "Only nurses can open this dashboard",
+      "Hanya perawat yang dapat menambah pasien": "Only nurses can add patients",
+      "Hanya perawat yang dapat mengedit pasien": "Only nurses can edit patients",
+      "Hanya perawat yang dapat menghapus pasien": "Only nurses can remove patients",
+      "Hanya perawat yang dapat mengatur jadwal obat": "Only nurses can manage medication schedules",
+      "Jadwal obat tidak ditemukan": "Medication schedule not found",
+      "Nama pasien wajib diisi": "Patient name is required",
+      "Pasien, tanggal mulai, tanggal selesai, nama obat, dosis, bentuk obat, dan jam minum wajib diisi": "Patient, start date, end date, medication name, dose, form, and time are required",
+      "Tanggal selesai tidak boleh lebih awal dari tanggal mulai": "The end date cannot be earlier than the start date",
+      "Tanggal, nama obat, dosis, bentuk obat, dan jam minum wajib diisi": "Date, medication name, dose, form, and time are required",
+      "Pasien tidak ditemukan": "Patient not found",
+      "Pesan tidak boleh kosong": "Message cannot be empty",
+      "Survei motivasi harian wajib mengisi 5 pertanyaan singkat": "The daily motivation survey needs all 5 short questions answered",
+      "Survei motivasi harian wajib diisi": "The daily motivation survey is required",
+      "Survei self-efficacy harian wajib mengisi 10 pertanyaan": "The daily self-efficacy survey needs all 10 questions answered",
       "Belum Konfirmasi": "Not Confirmed",
       "Diminum": "Taken",
       "Terlambat": "Late",
@@ -232,9 +256,11 @@
     });
     if (response.status === 401) {
       if (redirectOnAuth !== false) window.location.href = "/";
-      throw new Error(t("Silakan login terlebih dahulu", "Please sign in first"));
+      const { error } = await response.json().catch(() => ({}));
+      throw new Error(error ? t(error) : t("Silakan login terlebih dahulu", "Please sign in first"));
     }
-    if (!response.ok) throw new Error((await response.json()).error || "API error");
+    // Server errors are written in Indonesian; known ones are translated through the dictionary.
+    if (!response.ok) throw new Error(t((await response.json().catch(() => ({}))).error || "API error"));
     return response.json();
   }
 
@@ -350,27 +376,48 @@
   }
 
   const MEDICATION_FORMS_EN = { kapsul: "capsule", kaplet: "caplet", tablet: "tablet", sirup: "syrup", bungkus: "sachet", sachet: "sachet", tetes: "drops", sendok: "spoon" };
+  const MEDICATION_FORMS_ID = { capsule: "kapsul", caplet: "kaplet", tablet: "tablet", syrup: "sirup", sachet: "sachet", drops: "tetes", spoon: "sendok" };
+  const MEDICATION_NAMES_EN = {
+    "Streptomisin": "Streptomycin",
+    "Kanamisin": "Kanamycin",
+    "Amikasin": "Amikacin",
+    "Kapreomisin": "Capreomycin",
+    "Etionamid": "Ethionamide",
+    "Sikloserin": "Cycloserine",
+    "Asam p-aminosalisilat (PAS)": "p-Aminosalicylic acid (PAS)"
+  };
 
-  // Medication forms are typed by nurses in Indonesian ("2 Tablet", "1 Kapsul"); show them in English when English is selected.
+  function matchCase(source, word) {
+    return source[0] === source[0].toUpperCase() ? word[0].toUpperCase() + word.slice(1) : word;
+  }
+
+  // Medication forms are typed by nurses ("2 Tablet", "1 Kapsul", sometimes "1 Capsule"); show them in the patient's language.
   function localizedMedicationForm(form) {
     const value = String(form || "");
-    if (currentLanguage() !== "en") return value;
+    if (currentLanguage() !== "en") {
+      return value.replace(/\b(capsules?|caplets?|tablets|syrup|sachets?|drops|spoons?)\b/gi, word => matchCase(word, MEDICATION_FORMS_ID[word.toLowerCase().replace(/s$/, "")] || MEDICATION_FORMS_ID[word.toLowerCase()]));
+    }
     const amount = parseFloat(value.replace(",", "."));
     return value.replace(/\b(kapsul|kaplet|tablet|sirup|bungkus|sachet|tetes|sendok)\b/gi, word => {
       const english = MEDICATION_FORMS_EN[word.toLowerCase()];
-      const label = amount > 1 && !["syrup", "drops"].includes(english) ? `${english}s` : english;
-      return word[0] === word[0].toUpperCase() ? label[0].toUpperCase() + label.slice(1) : label;
+      return matchCase(word, amount > 1 && !["syrup", "drops"].includes(english) ? `${english}s` : english);
     });
   }
 
+  // Medication names are stored as picked from the nurse's list; a few use Indonesian spelling.
+  function localizedMedicationName(name) {
+    return currentLanguage() === "en" ? MEDICATION_NAMES_EN[name] || name : name;
+  }
+
   function localizedPhase(phase) {
-    if (currentLanguage() !== "en") return phase;
-    return { intensif: "Intensive", lanjutan: "Continuation" }[String(phase || "").trim().toLowerCase()] || phase;
+    const key = String(phase || "").trim().toLowerCase();
+    if (currentLanguage() === "en") return { intensif: "Intensive", lanjutan: "Continuation" }[key] || phase;
+    return { intensive: "Intensif", continuation: "Lanjutan" }[key] || phase;
   }
 
   function formatMedication(medication) {
     if (!medication) return t("Tidak ada jadwal", "No schedule");
-    const parts = [medication.name, medication.form ? `(${localizedMedicationForm(medication.form)})` : ""].filter(Boolean);
+    const parts = [localizedMedicationName(medication.name), medication.form ? `(${localizedMedicationForm(medication.form)})` : ""].filter(Boolean);
     return parts.join(" ");
   }
 
@@ -1032,7 +1079,7 @@
               <span class="material-symbols-outlined text-primary text-[32px]">pill</span>
             </div>
             <div>
-              <h4 class="font-headline-sm text-on-surface">${med.name}</h4>
+              <h4 class="font-headline-sm text-on-surface">${localizedMedicationName(med.name)}</h4>
               <p class="text-on-surface-variant font-body-md">${med.dose} • ${localizedMedicationForm(med.form)}</p>
               <p class="text-on-surface-variant text-sm">${formatDateId(med.takenDate)}</p>
               <div class="flex items-center gap-xs mt-1 text-primary font-semibold">
@@ -1237,9 +1284,15 @@
   }
 
   function complianceTone(score) {
-    if (score >= 90) return { text: "On Track", color: "text-secondary", bg: "bg-secondary" };
-    if (score >= 70) return { text: "At Risk", color: "text-tertiary", bg: "bg-tertiary" };
-    return { text: "Critical", color: "text-error", bg: "bg-error" };
+    if (score >= 90) return { text: t("Sesuai Target", "On Track"), color: "text-secondary", bg: "bg-secondary" };
+    if (score >= 70) return { text: t("Berisiko", "At Risk"), color: "text-tertiary", bg: "bg-tertiary" };
+    return { text: t("Kritis", "Critical"), color: "text-error", bg: "bg-error" };
+  }
+
+  function localizedRisk(level) {
+    const labels = { low: ["Rendah", "Low"], medium: ["Sedang", "Medium"], high: ["Tinggi", "High"] };
+    const pair = labels[String(level || "").toLowerCase()];
+    return pair ? t(pair[0], pair[1]) : level || "-";
   }
 
   function todayDate() {
@@ -1258,14 +1311,14 @@
   }
 
   const tbMedicationOptions = [
-    { group: "Obat TBC Lini Pertama", items: [
+    { group: "Obat TBC Lini Pertama", groupEn: "First-line TB drugs", items: [
       "Isoniazid (INH)",
       "Rifampicin (Rifampisin)",
       "Pyrazinamide (Pirasinamid)",
       "Ethambutol (Etambutol)",
       "Streptomisin"
     ] },
-    { group: "Obat TBC Lini Kedua", items: [
+    { group: "Obat TBC Lini Kedua", groupEn: "Second-line TB drugs", items: [
       "Levofloxacin",
       "Moxifloxacin",
       "Kanamisin",
@@ -1279,11 +1332,11 @@
 
   function medicationOptionMarkup(selected = "") {
     const groups = tbMedicationOptions.map(group => `
-      <optgroup label="${group.group}">
-        ${group.items.map(item => `<option value="${item}" ${item === selected ? "selected" : ""}>${item}</option>`).join("")}
+      <optgroup label="${t(group.group, group.groupEn)}">
+        ${group.items.map(item => `<option value="${item}" ${item === selected ? "selected" : ""}>${localizedMedicationName(item)}</option>`).join("")}
       </optgroup>`).join("");
     const known = tbMedicationOptions.some(group => group.items.includes(selected));
-    return `<option value="">Pilih obat</option>${groups}<option value="__other" ${selected && !known ? "selected" : ""}>Lainnya / isi sendiri</option>`;
+    return `<option value="">${t("Pilih obat", "Select medication")}</option>${groups}<option value="__other" ${selected && !known ? "selected" : ""}>${t("Lainnya / isi sendiri", "Other / type it in")}</option>`;
   }
 
   function resolveMedicationName(form) {
@@ -1307,24 +1360,24 @@
 
   function renderNursePatientTable(patients) {
     if (!patients.length) {
-      return `<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md text-on-surface-variant">Tidak ada pasien sesuai pencarian.</div>`;
+      return `<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md text-on-surface-variant">${t("Tidak ada pasien sesuai pencarian.", "No patients match your search.")}</div>`;
     }
     return `
       <div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden">
         <div class="p-md border-b border-outline-variant/30 flex justify-between items-center">
-          <h5 class="font-headline-sm text-headline-sm">Detailed Patient List</h5>
-          <p class="text-label-md text-on-surface-variant">Showing ${patients.length} patients</p>
+          <h5 class="font-headline-sm text-headline-sm">${t("Daftar Pasien Lengkap", "Detailed Patient List")}</h5>
+          <p class="text-label-md text-on-surface-variant">${tf("Menampilkan {count} pasien", "Showing {count} patients", { count: patients.length })}</p>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left">
             <thead class="bg-surface-container-low/50">
               <tr>
-                <th class="px-md py-4 font-label-md text-outline uppercase tracking-wider">Patient Name</th>
-                <th class="px-md py-4 font-label-md text-outline uppercase tracking-wider">Compliance Score</th>
-                <th class="px-md py-4 font-label-md text-outline uppercase tracking-wider">Phase</th>
+                <th class="px-md py-4 font-label-md text-outline uppercase tracking-wider">${t("Nama Pasien", "Patient Name")}</th>
+                <th class="px-md py-4 font-label-md text-outline uppercase tracking-wider">${t("Skor Kepatuhan", "Compliance Score")}</th>
+                <th class="px-md py-4 font-label-md text-outline uppercase tracking-wider">${t("Fase", "Phase")}</th>
                 <th class="px-md py-4 font-label-md text-outline uppercase tracking-wider">Self-Efficacy</th>
                 <th class="px-md py-4 font-label-md text-outline uppercase tracking-wider">Status</th>
-                <th class="px-md py-4 font-label-md text-outline uppercase tracking-wider">Action</th>
+                <th class="px-md py-4 font-label-md text-outline uppercase tracking-wider">${t("Aksi", "Action")}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-outline-variant/20">
@@ -1347,10 +1400,10 @@
                         <div class="w-20 bg-surface-container-low h-1.5 rounded-full overflow-hidden"><div class="${tone.bg} h-full" style="width:${patient.adherenceScore}%"></div></div>
                       </div>
                     </td>
-                    <td class="px-md py-4"><span class="px-3 py-1 bg-primary-container/10 text-primary font-label-md rounded-full">${patient.phase}</span></td>
+                    <td class="px-md py-4"><span class="px-3 py-1 bg-primary-container/10 text-primary font-label-md rounded-full">${localizedPhase(patient.phase)}</span></td>
                     <td class="px-md py-4 text-on-surface-variant font-label-md">${patient.selfEfficacyScore}%</td>
                     <td class="px-md py-4"><div class="flex items-center gap-xs ${tone.color}"><span class="w-2 h-2 rounded-full ${tone.bg}"></span><span class="font-label-md">${tone.text}</span></div></td>
-                    <td class="px-md py-4"><div class="flex gap-sm"><button class="text-primary hover:underline font-label-md" data-patient-edit="${patient.id}">Edit</button><button class="text-error hover:underline font-label-md" data-patient-delete="${patient.id}">Hapus</button></div></td>
+                    <td class="px-md py-4"><div class="flex gap-sm"><button class="text-primary hover:underline font-label-md" data-patient-edit="${patient.id}">${t("Ubah", "Edit")}</button><button class="text-error hover:underline font-label-md" data-patient-delete="${patient.id}">${t("Hapus", "Delete")}</button></div></td>
                   </tr>`;
               }).join("")}
             </tbody>
@@ -1362,11 +1415,11 @@
   function renderNurseCards(summary) {
     return `
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-md">
-        <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30"><p class="text-on-surface-variant font-label-md">Total Patients Active</p><h4 class="text-[32px] font-bold text-on-surface mt-1">${summary.totalActive}</h4><p class="text-[12px] text-on-secondary-container bg-secondary-container/30 px-2 py-0.5 rounded-full inline-block mt-2">Live database</p></div>
-        <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30"><p class="text-on-surface-variant font-label-md">High Compliance (90%+)</p><h4 class="text-[32px] font-bold text-on-surface mt-1">${summary.highCompliance}</h4></div>
-        <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30"><p class="text-on-surface-variant font-label-md">Medium Compliance</p><h4 class="text-[32px] font-bold text-on-surface mt-1">${summary.mediumCompliance}</h4><p class="text-[12px] text-on-surface-variant mt-2">70% - 89% score</p></div>
-        <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30"><p class="text-on-surface-variant font-label-md">Low Compliance</p><h4 class="text-[32px] font-bold text-on-surface mt-1">${summary.lowCompliance}</h4><p class="text-[12px] text-error font-semibold mt-2">Needs intervention</p></div>
-        <div class="bg-primary-container p-md rounded-xl shadow-lg text-on-primary"><p class="text-on-primary/80 font-label-md">No Confirmation Today</p><h4 class="text-[32px] font-bold mt-1">${summary.pendingMedication}</h4><p class="text-[12px] font-semibold mt-2 text-on-primary">From today's schedule</p></div>
+        <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30"><p class="text-on-surface-variant font-label-md">${t("Total Pasien Aktif", "Total Patients Active")}</p><h4 class="text-[32px] font-bold text-on-surface mt-1">${summary.totalActive}</h4><p class="text-[12px] text-on-secondary-container bg-secondary-container/30 px-2 py-0.5 rounded-full inline-block mt-2">${t("Data langsung dari database", "Live database")}</p></div>
+        <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30"><p class="text-on-surface-variant font-label-md">${t("Kepatuhan Tinggi (90%+)", "High Compliance (90%+)")}</p><h4 class="text-[32px] font-bold text-on-surface mt-1">${summary.highCompliance}</h4></div>
+        <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30"><p class="text-on-surface-variant font-label-md">${t("Kepatuhan Sedang", "Medium Compliance")}</p><h4 class="text-[32px] font-bold text-on-surface mt-1">${summary.mediumCompliance}</h4><p class="text-[12px] text-on-surface-variant mt-2">${t("Skor 70% - 89%", "70% - 89% score")}</p></div>
+        <div class="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/30"><p class="text-on-surface-variant font-label-md">${t("Kepatuhan Rendah", "Low Compliance")}</p><h4 class="text-[32px] font-bold text-on-surface mt-1">${summary.lowCompliance}</h4><p class="text-[12px] text-error font-semibold mt-2">${t("Perlu intervensi", "Needs intervention")}</p></div>
+        <div class="bg-primary-container p-md rounded-xl shadow-lg text-on-primary"><p class="text-on-primary/80 font-label-md">${t("Belum Konfirmasi Hari Ini", "No Confirmation Today")}</p><h4 class="text-[32px] font-bold mt-1">${summary.pendingMedication}</h4><p class="text-[12px] font-semibold mt-2 text-on-primary">${t("Dari jadwal hari ini", "From today's schedule")}</p></div>
       </div>`;
   }
 
@@ -1389,8 +1442,8 @@
             <div class="w-14 h-14 rounded-xl bg-primary text-on-primary flex items-center justify-center mb-sm">
               <span class="material-symbols-outlined">admin_panel_settings</span>
             </div>
-            <h1 class="font-headline-md text-headline-md text-on-surface">Login Admin/Perawat</h1>
-            <p class="text-on-surface-variant">Masuk menggunakan username dan password admin yang sudah dikonfigurasi.</p>
+            <h1 class="font-headline-md text-headline-md text-on-surface">${t("Login Admin/Perawat", "Admin/Nurse Sign In")}</h1>
+            <p class="text-on-surface-variant">${t("Masuk menggunakan username dan password admin yang sudah dikonfigurasi.", "Sign in with the configured admin username and password.")}</p>
           </div>
           <div data-login-error class="rounded-lg border border-error/30 bg-error/10 text-error px-4 py-3 text-sm" ${errorMessage ? "" : "hidden"}>${errorMessage}</div>
           <label class="block space-y-xs">
@@ -1398,11 +1451,11 @@
             <input name="username" type="text" autocomplete="username" required value="${isLocalHost() ? "hcahyanto@ikbis.ac.id" : ""}" class="w-full h-12 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 focus:outline-none focus:ring-2 focus:ring-primary" />
           </label>
           <label class="block space-y-xs">
-            <span class="font-label-md text-on-surface">Password</span>
+            <span class="font-label-md text-on-surface">${t("Kata Sandi", "Password")}</span>
             <input name="password" type="password" autocomplete="current-password" required class="w-full h-12 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 focus:outline-none focus:ring-2 focus:ring-primary" />
           </label>
-          <button type="submit" class="w-full h-12 rounded-lg bg-primary text-on-primary font-button-text shadow-md active:scale-95 transition-all">Masuk Dashboard Admin</button>
-          <a href="/" class="block text-center text-primary font-label-md">Kembali ke halaman pasien</a>
+          <button type="submit" class="w-full h-12 rounded-lg bg-primary text-on-primary font-button-text shadow-md active:scale-95 transition-all">${t("Masuk Dashboard Admin", "Sign In to Admin Dashboard")}</button>
+          <a href="/" class="block text-center text-primary font-label-md">${t("Kembali ke halaman pasien", "Back to the patient page")}</a>
         </form>
       </section>
     `;
@@ -1413,10 +1466,12 @@
         const button = form.querySelector('button[type="submit"]');
         const formData = new FormData(form);
         button.disabled = true;
-        button.textContent = "Memeriksa...";
+        button.textContent = t("Memeriksa...", "Checking...");
         try {
+          // A wrong password answers 401; show the message instead of treating it as an expired session.
           await api("/api/auth/nurse-login", {
             method: "POST",
+            redirectOnAuth: false,
             body: JSON.stringify({
               username: formData.get("username"),
               password: formData.get("password")
@@ -1430,13 +1485,40 @@
             alert.hidden = false;
           }
           button.disabled = false;
-          button.textContent = "Masuk Dashboard Admin";
+          button.textContent = t("Masuk Dashboard Admin", "Sign In to Admin Dashboard");
         }
       });
     });
   }
 
+  const NURSE_VIEW_LABELS = {
+    "overview": ["Dashboard Perawat", "Nurse Dashboard"],
+    "patient list": ["Daftar Pasien", "Patient List"],
+    "medication schedule": ["Jadwal Pengobatan", "Medication Schedule"],
+    "assessment results": ["Hasil Penilaian", "Assessment Results"],
+    "education content": ["Konten Edukasi", "Education Content"],
+    "motivation messages": ["Pesan Motivasi", "Motivation Messages"],
+    "settings": ["Pengaturan", "Settings"]
+  };
+
+  function nurseViewLabel(view) {
+    const [indonesian, english] = NURSE_VIEW_LABELS[view] || [view, view];
+    return t(indonesian, english);
+  }
+
+  // Indonesian content from the database, plus an English copy when English is selected (null otherwise).
+  async function nurseContent(path) {
+    const [original, translated] = await Promise.all([
+      api(path),
+      currentLanguage() === "en" ? api(`${path}?lang=en`).catch(() => null) : null
+    ]);
+    const changed = translated && JSON.stringify(translated) !== JSON.stringify(original);
+    return { items: changed ? translated : original, note: changed ? `<p class="text-sm text-on-surface-variant">Content is translated automatically.</p>` : "" };
+  }
+
   async function initNurse() {
+    // Hide the static demo dashboard (fake patients and numbers) while the real data loads.
+    nurseShell()?.replaceChildren();
     let data;
     try {
       data = await api("/api/nurse/overview", { redirectOnAuth: false });
@@ -1449,7 +1531,7 @@
     if (!shell) return;
     const state = { data, filtered: data.patients, view: "overview" };
     const title = document.querySelector("main.md\\:ml-80 h2");
-    const searchInput = document.querySelector('input[placeholder="Search patient name or ID..."]');
+    const searchInput = document.querySelector("[data-nurse-search]");
 
     function filterPatients() {
       const query = (searchInput?.value || "").toLowerCase().trim();
@@ -1460,13 +1542,13 @@
       );
     }
 
-    function actionBar(heading, subtitle = "Data tersambung ke PostgreSQL") {
+    function actionBar(heading, subtitle = t("Data tersambung ke PostgreSQL", "Connected to PostgreSQL")) {
       return `
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-sm mb-base">
           <div><h3 class="font-headline-sm text-headline-sm text-on-surface">${heading}</h3><p class="text-on-surface-variant font-label-md">${subtitle}</p></div>
           <div class="flex items-center gap-sm">
-            <button data-nurse-action="export" class="flex items-center gap-xs px-4 py-3 border border-secondary text-secondary font-button-text rounded-lg hover:bg-secondary/5 transition-colors h-12"><span class="material-symbols-outlined text-[20px]">ios_share</span>Export Report</button>
-            <button data-nurse-action="add-patient" class="flex items-center gap-xs px-6 py-3 bg-primary text-on-primary font-button-text rounded-lg shadow-md active:scale-95 transition-all h-12"><span class="material-symbols-outlined text-[20px]">person_add</span>Add Patient</button>
+            <button data-nurse-action="export" class="flex items-center gap-xs px-4 py-3 border border-secondary text-secondary font-button-text rounded-lg hover:bg-secondary/5 transition-colors h-12"><span class="material-symbols-outlined text-[20px]">ios_share</span>${t("Ekspor Laporan", "Export Report")}</button>
+            <button data-nurse-action="add-patient" class="flex items-center gap-xs px-6 py-3 bg-primary text-on-primary font-button-text rounded-lg shadow-md active:scale-95 transition-all h-12"><span class="material-symbols-outlined text-[20px]">person_add</span>${t("Tambah Pasien", "Add Patient")}</button>
           </div>
         </div>`;
     }
@@ -1474,17 +1556,23 @@
     async function render(view = state.view) {
       state.view = view;
       filterPatients();
-      if (title) title.textContent = view === "overview" ? "Dashboard Perawat" : view;
+      if (title) title.textContent = nurseViewLabel(view);
       document.querySelectorAll("aside nav a").forEach(link => {
-        const active = link.textContent.trim().toLowerCase().includes(view.toLowerCase()) || (view === "overview" && link.textContent.includes("Overview"));
+        const active = link.dataset.nurseView === view;
         link.classList.toggle("bg-primary-container", active);
         link.classList.toggle("text-on-primary-container", active);
       });
 
       if (view === "overview") {
-        shell.innerHTML = `${actionBar("Overview Tracking", `Data update: ${new Date(state.data.updatedAt).toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })}`)}${renderNurseCards(state.data.summary)}<div class="grid grid-cols-1 lg:grid-cols-3 gap-md"><div class="lg:col-span-2">${renderNursePatientTable(state.filtered)}</div><div class="bg-surface-container-highest/30 p-md rounded-xl border border-dashed border-outline-variant"><h5 class="font-headline-sm text-headline-sm mb-md">Key Insights</h5><p class="text-on-surface-variant">${state.data.summary.lowCompliance} pasien perlu intervensi dan ${state.data.summary.pendingMedication} jadwal obat belum dikonfirmasi hari ini.</p></div></div>`;
+        const updatedAt = new Date(state.data.updatedAt).toLocaleString(currentLanguage() === "en" ? "en-US" : "id-ID", { timeZone: "Asia/Jakarta" });
+        const insight = tf(
+          "{low} pasien perlu intervensi dan {pending} jadwal obat belum dikonfirmasi hari ini.",
+          "{low} patients need intervention and {pending} medication doses have not been confirmed today.",
+          { low: state.data.summary.lowCompliance, pending: state.data.summary.pendingMedication }
+        );
+        shell.innerHTML = `${actionBar(t("Ringkasan Pemantauan", "Overview Tracking"), tf("Pembaruan data: {time}", "Data update: {time}", { time: updatedAt }))}${renderNurseCards(state.data.summary)}<div class="grid grid-cols-1 lg:grid-cols-3 gap-md"><div class="lg:col-span-2">${renderNursePatientTable(state.filtered)}</div><div class="bg-surface-container-highest/30 p-md rounded-xl border border-dashed border-outline-variant"><h5 class="font-headline-sm text-headline-sm mb-md">${t("Wawasan Utama", "Key Insights")}</h5><p class="text-on-surface-variant">${insight}</p></div></div>`;
       } else if (view === "patient list") {
-        shell.innerHTML = `${actionBar("Patient List")}${renderNursePatientTable(state.filtered)}`;
+        shell.innerHTML = `${actionBar(nurseViewLabel("patient list"))}${renderNursePatientTable(state.filtered)}`;
       } else if (view === "medication schedule") {
         const selectedPatientId = state.selectedMedicationPatientId || state.filtered[0]?.id || state.data.patients[0]?.id;
         state.selectedMedicationPatientId = selectedPatientId;
@@ -1492,33 +1580,43 @@
         const selectedDate = state.selectedMedicationDate || todayDate();
         state.selectedMedicationDate = selectedDate;
         const rows = selectedPatient ? (await api(`/api/medications?patientId=${selectedPatient.id}&date=${selectedDate}`).catch(() => [])).map(med => ({ patient: selectedPatient, med })) : [];
-        shell.innerHTML = `${actionBar("Medication Schedule", "Pilih pasien, tanggal mulai, tanggal selesai, dan jam. Jika rentangnya 2 bulan, jadwal harian otomatis dibuat dengan jam yang sama.")}
+        shell.innerHTML = `${actionBar(nurseViewLabel("medication schedule"), t(
+          "Pilih pasien, tanggal mulai, tanggal selesai, dan jam. Jika rentangnya 2 bulan, jadwal harian otomatis dibuat dengan jam yang sama.",
+          "Choose the patient, start date, end date, and time. For a 2-month range, a daily schedule is created automatically at the same time."
+        ))}
           <form id="medication-form" class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm grid grid-cols-1 md:grid-cols-8 gap-sm items-end">
             <input type="hidden" name="medicationId" />
-            <label class="md:col-span-2"><span class="font-label-md text-on-surface-variant">Pasien</span><select name="patientId" class="mt-xs w-full rounded-lg border-outline-variant bg-surface-container-lowest">${state.data.patients.map(patient => `<option value="${patient.id}" ${patient.id === selectedPatientId ? "selected" : ""}>${patient.name} - ${patient.medicalRecordNumber}</option>`).join("")}</select></label>
-            <label><span class="font-label-md text-on-surface-variant">Tanggal Mulai</span><input name="takenDate" type="date" value="${selectedDate}" class="mt-xs w-full rounded-lg border-outline-variant" required /></label>
-            <label><span class="font-label-md text-on-surface-variant">Tanggal Selesai</span><input name="endDate" type="date" value="${state.selectedMedicationEndDate || selectedDate}" class="mt-xs w-full rounded-lg border-outline-variant" required /></label>
-            <label><span class="font-label-md text-on-surface-variant">Obat</span><select name="name" class="mt-xs w-full rounded-lg border-outline-variant bg-surface-container-lowest" required>${medicationOptionMarkup()}</select><input name="customName" class="hidden mt-xs w-full rounded-lg border-outline-variant" placeholder="Tulis nama obat lainnya" /></label>
-            <label><span class="font-label-md text-on-surface-variant">Dosis</span><input name="dose" class="mt-xs w-full rounded-lg border-outline-variant" placeholder="450mg" required /></label>
-            <label><span class="font-label-md text-on-surface-variant">Bentuk/Jumlah</span><input name="form" class="mt-xs w-full rounded-lg border-outline-variant" placeholder="1 Kapsul" required /></label>
-            <label><span class="font-label-md text-on-surface-variant">Jam</span><input name="scheduledTime" type="time" class="mt-xs w-full rounded-lg border-outline-variant" required /></label>
+            <label class="md:col-span-2"><span class="font-label-md text-on-surface-variant">${t("Pasien", "Patient")}</span><select name="patientId" class="mt-xs w-full rounded-lg border-outline-variant bg-surface-container-lowest">${state.data.patients.map(patient => `<option value="${patient.id}" ${patient.id === selectedPatientId ? "selected" : ""}>${patient.name} - ${patient.medicalRecordNumber}</option>`).join("")}</select></label>
+            <label><span class="font-label-md text-on-surface-variant">${t("Tanggal Mulai", "Start Date")}</span><input name="takenDate" type="date" value="${selectedDate}" class="mt-xs w-full rounded-lg border-outline-variant" required /></label>
+            <label><span class="font-label-md text-on-surface-variant">${t("Tanggal Selesai", "End Date")}</span><input name="endDate" type="date" value="${state.selectedMedicationEndDate || selectedDate}" class="mt-xs w-full rounded-lg border-outline-variant" required /></label>
+            <label><span class="font-label-md text-on-surface-variant">${t("Obat", "Medication")}</span><select name="name" class="mt-xs w-full rounded-lg border-outline-variant bg-surface-container-lowest" required>${medicationOptionMarkup()}</select><input name="customName" class="hidden mt-xs w-full rounded-lg border-outline-variant" placeholder="${t("Tulis nama obat lainnya", "Type another medication name")}" /></label>
+            <label><span class="font-label-md text-on-surface-variant">${t("Dosis", "Dose")}</span><input name="dose" class="mt-xs w-full rounded-lg border-outline-variant" placeholder="450mg" required /></label>
+            <label><span class="font-label-md text-on-surface-variant">${t("Bentuk/Jumlah", "Form/Amount")}</span><input name="form" class="mt-xs w-full rounded-lg border-outline-variant" placeholder="${t("1 Kapsul", "1 Capsule")}" required /></label>
+            <label><span class="font-label-md text-on-surface-variant">${t("Jam", "Time")}</span><input name="scheduledTime" type="time" class="mt-xs w-full rounded-lg border-outline-variant" required /></label>
             <div class="md:col-span-8 flex flex-wrap gap-sm">
-              <button class="px-5 py-3 bg-primary text-on-primary rounded-lg font-button-text" type="submit">Simpan Jadwal Harian</button>
-              <button class="px-5 py-3 border border-outline-variant rounded-lg font-button-text" type="button" data-medication-reset>Reset Form</button>
+              <button class="px-5 py-3 bg-primary text-on-primary rounded-lg font-button-text" type="submit">${t("Simpan Jadwal Harian", "Save Daily Schedule")}</button>
+              <button class="px-5 py-3 border border-outline-variant rounded-lg font-button-text" type="button" data-medication-reset>${t("Atur Ulang Formulir", "Reset Form")}</button>
             </div>
           </form>
-          <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm"><h4 class="font-headline-sm">${selectedPatient ? selectedPatient.name : "Tidak ada pasien"}</h4><p class="text-on-surface-variant">Jadwal yang ditampilkan untuk ${formatDateId(selectedDate)}. Estimasi selesai mengikuti tanggal selesai terjauh dari jadwal pasien.</p></div>
-          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-md">${rows.length ? rows.map(({ patient, med }) => `<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm"><div class="flex justify-between gap-sm"><div><p class="font-bold text-on-surface">${med.name}</p><p class="text-on-surface-variant text-sm">${med.dose} • ${med.form}</p></div><div class="text-right"><span class="text-primary font-bold block">${med.scheduledTime}</span><span class="text-xs text-on-surface-variant">${formatDateId(med.takenDate)}</span></div></div><div class="mt-sm text-xs text-on-surface-variant">Rentang sampai ${formatDateId(med.endDate || med.takenDate)}</div><div class="mt-md pt-sm border-t border-outline-variant/20"><p class="font-label-md">${patient.name}</p><p class="text-sm text-on-surface-variant">${patient.medicalRecordNumber}</p><p class="mt-sm text-sm font-bold ${adminMedicationTone(med.status)}">${statusLabel(med.status)}${med.confirmedAt ? ` pukul ${med.confirmedAt}` : ""}</p>${med.confirmationVideoPath ? `<a class="block mt-xs text-primary font-label-md underline" href="/${med.confirmationVideoPath}" target="_blank">Lihat Video</a>` : ""}<div class="flex gap-sm mt-sm"><button class="text-primary font-label-md" data-med-edit="${med.id}" data-patient-id="${patient.id}" data-name="${med.name}" data-dose="${med.dose}" data-form="${med.form}" data-time="${med.scheduledTime}" data-date="${med.takenDate}" data-end-date="${med.endDate || med.takenDate}">Edit</button><button class="text-error font-label-md" data-med-delete="${med.id}">Hapus</button></div></div></div>`).join("") : `<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md text-on-surface-variant">Belum ada jadwal obat untuk pasien dan tanggal ini.</div>`}</div>`;
+          <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm"><h4 class="font-headline-sm">${selectedPatient ? selectedPatient.name : t("Tidak ada pasien", "No patient")}</h4><p class="text-on-surface-variant">${tf(
+            "Jadwal yang ditampilkan untuk {date}. Estimasi selesai mengikuti tanggal selesai terjauh dari jadwal pasien.",
+            "Schedules shown for {date}. The estimated completion follows the latest end date in the patient's schedule.",
+            { date: formatDateId(selectedDate) }
+          )}</p></div>
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-md">${rows.length ? rows.map(({ patient, med }) => `<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm"><div class="flex justify-between gap-sm"><div><p class="font-bold text-on-surface">${localizedMedicationName(med.name)}</p><p class="text-on-surface-variant text-sm">${med.dose} • ${localizedMedicationForm(med.form)}</p></div><div class="text-right"><span class="text-primary font-bold block">${med.scheduledTime}</span><span class="text-xs text-on-surface-variant">${formatDateId(med.takenDate)}</span></div></div><div class="mt-sm text-xs text-on-surface-variant">${tf("Rentang sampai {date}", "Runs until {date}", { date: formatDateId(med.endDate || med.takenDate) })}</div><div class="mt-md pt-sm border-t border-outline-variant/20"><p class="font-label-md">${patient.name}</p><p class="text-sm text-on-surface-variant">${patient.medicalRecordNumber}</p><p class="mt-sm text-sm font-bold ${adminMedicationTone(med.status)}">${statusLabel(med.status)}${med.confirmedAt ? tf(" pukul {time}", " at {time}", { time: med.confirmedAt }) : ""}</p>${med.confirmationVideoPath ? `<a class="block mt-xs text-primary font-label-md underline" href="/${med.confirmationVideoPath}" target="_blank">${t("Lihat Video", "View Video")}</a>` : ""}<div class="flex gap-sm mt-sm"><button class="text-primary font-label-md" data-med-edit="${med.id}" data-patient-id="${patient.id}" data-name="${med.name}" data-dose="${med.dose}" data-form="${med.form}" data-time="${med.scheduledTime}" data-date="${med.takenDate}" data-end-date="${med.endDate || med.takenDate}">${t("Ubah", "Edit")}</button><button class="text-error font-label-md" data-med-delete="${med.id}">${t("Hapus", "Delete")}</button></div></div></div>`).join("") : `<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md text-on-surface-variant">${t("Belum ada jadwal obat untuk pasien dan tanggal ini.", "There is no medication schedule for this patient and date yet.")}</div>`}</div>`;
       } else if (view === "assessment results") {
-        shell.innerHTML = `${actionBar("Assessment Results")}<div class="grid grid-cols-1 md:grid-cols-2 gap-md">${state.filtered.map(patient => `<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm"><h4 class="font-headline-sm">${patient.name}</h4><p class="text-on-surface-variant mb-md">${patient.medicalRecordNumber}</p><p>Kepatuhan: <b>${patient.adherenceScore}%</b></p><p>Self-Efficacy: <b>${patient.selfEfficacyScore}%</b></p><p>Risiko: <b>${patient.riskLevel}</b></p></div>`).join("")}</div>`;
+        shell.innerHTML = `${actionBar(nurseViewLabel("assessment results"))}<div class="grid grid-cols-1 md:grid-cols-2 gap-md">${state.filtered.map(patient => `<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm"><h4 class="font-headline-sm">${patient.name}</h4><p class="text-on-surface-variant mb-md">${patient.medicalRecordNumber}</p><p>${t("Kepatuhan", "Adherence")}: <b>${patient.adherenceScore}%</b></p><p>Self-Efficacy: <b>${patient.selfEfficacyScore}%</b></p><p>${t("Risiko", "Risk")}: <b>${localizedRisk(patient.riskLevel)}</b></p></div>`).join("")}</div>`;
       } else if (view === "education content") {
-        const items = await api("/api/education");
-        shell.innerHTML = `${actionBar("Education Content")}<div class="grid grid-cols-1 md:grid-cols-2 gap-md">${items.map(item => `<article class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm"><span class="text-sm text-secondary font-bold">${item.category}</span><h4 class="font-headline-sm mt-xs">${item.title}</h4><p class="text-on-surface-variant mt-sm">${item.summary}</p></article>`).join("")}</div>`;
+        const { items, note } = await nurseContent("/api/education");
+        shell.innerHTML = `${actionBar(nurseViewLabel("education content"))}${note}<div class="grid grid-cols-1 md:grid-cols-2 gap-md">${items.map(item => `<article class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm"><span class="text-sm text-secondary font-bold">${item.category}</span><h4 class="font-headline-sm mt-xs">${item.title}</h4><p class="text-on-surface-variant mt-sm">${item.summary}</p></article>`).join("")}</div>`;
       } else if (view === "motivation messages") {
-        const items = await api("/api/motivations");
-        shell.innerHTML = `${actionBar("Motivation Messages")}<div class="space-y-sm">${items.map(item => `<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm"><p class="font-headline-sm italic">"${item.message}"</p></div>`).join("")}</div>`;
+        const { items, note } = await nurseContent("/api/motivations");
+        shell.innerHTML = `${actionBar(nurseViewLabel("motivation messages"))}${note}<div class="space-y-sm">${items.map(item => `<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm"><p class="font-headline-sm italic">"${item.message}"</p></div>`).join("")}</div>`;
       } else {
-        shell.innerHTML = `${actionBar("Settings")}<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm"><p class="text-on-surface-variant">Pengaturan admin akan dikembangkan di tahap berikutnya. Session dan logout sudah aktif.</p></div>`;
+        shell.innerHTML = `${actionBar(nurseViewLabel("settings"))}<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-md shadow-sm"><p class="text-on-surface-variant">${t(
+          "Pengaturan admin akan dikembangkan di tahap berikutnya. Session dan logout sudah aktif.",
+          "Admin settings will be added in a later phase. Sessions and sign-out already work."
+        )}</p></div>`;
       }
       bindNurseActions();
     }
@@ -1536,32 +1634,40 @@
         button.addEventListener("click", async () => {
           const patient = state.data.patients.find(item => item.id === button.dataset.patientEdit);
           if (!patient) return;
-          const name = window.prompt("Nama pasien:", patient.name);
+          const name = window.prompt(t("Nama pasien:", "Patient name:"), patient.name);
           if (!name) return;
-          const googleEmail = window.prompt("Email Google pasien:", patient.googleEmail || "") || "";
-          const phase = window.prompt("Fase pengobatan:", patient.phase || "Intensif") || "Intensif";
-          const treatmentDay = window.prompt("Jumlah hari perawatan yang sudah berjalan:", patient.treatmentDay || 1) || patient.treatmentDay || 1;
-          const treatmentTargetDays = window.prompt("Target total hari pengobatan:", patient.treatmentTargetDays || 180) || patient.treatmentTargetDays || 180;
-          const adherenceScore = window.prompt("Skor kepatuhan manual (opsional, akan dihitung ulang dari konfirmasi):", patient.adherenceScore ?? 0) ?? patient.adherenceScore ?? 0;
-          const selfEfficacyScore = window.prompt("Skor self-efficacy (0-100):", patient.selfEfficacyScore ?? 0) ?? patient.selfEfficacyScore ?? 0;
-          await api(`/api/nurse/patients/${patient.id}`, {
-            method: "PUT",
-            body: JSON.stringify({ name, googleEmail, phase, treatmentDay, treatmentTargetDays, adherenceScore, selfEfficacyScore })
-          });
-          state.data = await api("/api/nurse/overview");
-          showToast("Data pasien berhasil diperbarui.");
-          await render(state.view);
+          const googleEmail = window.prompt(t("Email Google pasien:", "Patient's Google email:"), patient.googleEmail || "") || "";
+          const phase = window.prompt(t("Fase pengobatan:", "Treatment phase:"), patient.phase || "Intensif") || "Intensif";
+          const treatmentDay = window.prompt(t("Jumlah hari perawatan yang sudah berjalan:", "Treatment days completed so far:"), patient.treatmentDay || 1) || patient.treatmentDay || 1;
+          const treatmentTargetDays = window.prompt(t("Target total hari pengobatan:", "Target total treatment days:"), patient.treatmentTargetDays || 180) || patient.treatmentTargetDays || 180;
+          const adherenceScore = window.prompt(t("Skor kepatuhan manual (opsional, akan dihitung ulang dari konfirmasi):", "Manual adherence score (optional, recalculated from confirmations):"), patient.adherenceScore ?? 0) ?? patient.adherenceScore ?? 0;
+          const selfEfficacyScore = window.prompt(t("Skor self-efficacy (0-100):", "Self-efficacy score (0-100):"), patient.selfEfficacyScore ?? 0) ?? patient.selfEfficacyScore ?? 0;
+          try {
+            await api(`/api/nurse/patients/${patient.id}`, {
+              method: "PUT",
+              body: JSON.stringify({ name, googleEmail, phase, treatmentDay, treatmentTargetDays, adherenceScore, selfEfficacyScore })
+            });
+            state.data = await api("/api/nurse/overview");
+            showToast(t("Data pasien berhasil diperbarui.", "Patient data updated."));
+            await render(state.view);
+          } catch (error) {
+            showToast(error.message);
+          }
         });
       });
 
       shell.querySelectorAll("[data-patient-delete]").forEach(button => {
         button.addEventListener("click", async () => {
           const patient = state.data.patients.find(item => item.id === button.dataset.patientDelete);
-          if (!patient || !window.confirm(`Hapus/nonaktifkan data pasien ${patient.name}?`)) return;
-          await api(`/api/nurse/patients/${patient.id}`, { method: "DELETE" });
-          state.data = await api("/api/nurse/overview");
-          showToast("Data pasien berhasil dinonaktifkan.");
-          await render(state.view);
+          if (!patient || !window.confirm(tf("Hapus/nonaktifkan data pasien {name}?", "Delete/deactivate patient {name}?", { name: patient.name }))) return;
+          try {
+            await api(`/api/nurse/patients/${patient.id}`, { method: "DELETE" });
+            state.data = await api("/api/nurse/overview");
+            showToast(t("Data pasien berhasil dinonaktifkan.", "Patient deactivated."));
+            await render(state.view);
+          } catch (error) {
+            showToast(error.message);
+          }
         });
       });
       shell.querySelector('[data-nurse-action="export"]')?.addEventListener("click", () => {
@@ -1571,16 +1677,20 @@
         ]);
       });
       shell.querySelector('[data-nurse-action="add-patient"]')?.addEventListener("click", async () => {
-        const name = window.prompt("Nama pasien baru:");
+        const name = window.prompt(t("Nama pasien baru:", "New patient name:"));
         if (!name) return;
-        const googleEmail = window.prompt("Email Google pasien (opsional):") || "";
-        const phase = window.prompt("Fase pengobatan:", "Intensif") || "Intensif";
-        const treatmentDay = window.prompt("Jumlah hari perawatan yang sudah berjalan:", "1") || "1";
-        const treatmentTargetDays = window.prompt("Target total hari pengobatan:", "180") || "180";
-        await api("/api/nurse/patients", { method: "POST", body: JSON.stringify({ name, googleEmail, phase, treatmentDay, treatmentTargetDays }) });
-        state.data = await api("/api/nurse/overview");
-        showToast("Pasien berhasil ditambahkan.");
-        await render(state.view);
+        const googleEmail = window.prompt(t("Email Google pasien (opsional):", "Patient's Google email (optional):")) || "";
+        const phase = window.prompt(t("Fase pengobatan:", "Treatment phase:"), "Intensif") || "Intensif";
+        const treatmentDay = window.prompt(t("Jumlah hari perawatan yang sudah berjalan:", "Treatment days completed so far:"), "1") || "1";
+        const treatmentTargetDays = window.prompt(t("Target total hari pengobatan:", "Target total treatment days:"), "180") || "180";
+        try {
+          await api("/api/nurse/patients", { method: "POST", body: JSON.stringify({ name, googleEmail, phase, treatmentDay, treatmentTargetDays }) });
+          state.data = await api("/api/nurse/overview");
+          showToast(t("Pasien berhasil ditambahkan.", "Patient added."));
+          await render(state.view);
+        } catch (error) {
+          showToast(error.message);
+        }
       });
 
       const medicationForm = shell.querySelector("#medication-form");
@@ -1612,23 +1722,27 @@
         const medicationId = payload.medicationId;
         delete payload.medicationId;
         if (!payload.name) {
-          showToast("Pilih obat atau isi nama obat lainnya.");
+          showToast(t("Pilih obat atau isi nama obat lainnya.", "Select a medication or type another name."));
           return;
         }
-        if (medicationId) {
-          await api(`/api/nurse/medications/${medicationId}`, {
-            method: "PUT",
-            body: JSON.stringify({ ...payload, status: "pending" })
-          });
-          showToast("Jadwal obat berhasil diperbarui dan status pasien direset menjadi belum konfirmasi.");
-        } else {
-          await api("/api/nurse/medications", {
-            method: "POST",
-            body: JSON.stringify(payload)
-          });
-          showToast("Jadwal obat harian berhasil dibuat sampai tanggal selesai.");
+        try {
+          if (medicationId) {
+            await api(`/api/nurse/medications/${medicationId}`, {
+              method: "PUT",
+              body: JSON.stringify({ ...payload, status: "pending" })
+            });
+            showToast(t("Jadwal obat berhasil diperbarui dan status pasien direset menjadi belum konfirmasi.", "Medication schedule updated; the patient's status was reset to not confirmed."));
+          } else {
+            await api("/api/nurse/medications", {
+              method: "POST",
+              body: JSON.stringify(payload)
+            });
+            showToast(t("Jadwal obat harian berhasil dibuat sampai tanggal selesai.", "Daily medication schedule created up to the end date."));
+          }
+          await render("medication schedule");
+        } catch (error) {
+          showToast(error.message);
         }
-        await render("medication schedule");
       });
 
       shell.querySelector("[data-medication-reset]")?.addEventListener("click", () => {
@@ -1662,10 +1776,14 @@
 
       shell.querySelectorAll("[data-med-delete]").forEach(button => {
         button.addEventListener("click", async () => {
-          if (!window.confirm("Hapus jadwal obat ini?")) return;
-          await api(`/api/nurse/medications/${button.dataset.medDelete}`, { method: "DELETE" });
-          showToast("Jadwal obat berhasil dihapus.");
-          await render("medication schedule");
+          if (!window.confirm(t("Hapus jadwal obat ini?", "Delete this medication schedule?"))) return;
+          try {
+            await api(`/api/nurse/medications/${button.dataset.medDelete}`, { method: "DELETE" });
+            showToast(t("Jadwal obat berhasil dihapus.", "Medication schedule deleted."));
+            await render("medication schedule");
+          } catch (error) {
+            showToast(error.message);
+          }
         });
       });
     }
@@ -1673,20 +1791,12 @@
     document.querySelectorAll("aside nav a, aside .mt-auto a").forEach(link => {
       link.addEventListener("click", async event => {
         event.preventDefault();
-        const label = link.textContent.trim().toLowerCase();
-        const icon = link.querySelector(".material-symbols-outlined")?.textContent.trim().toLowerCase();
-        if (label.includes("sign out") || label.includes("keluar") || icon === "logout") {
+        if (link.hasAttribute("data-nurse-logout")) {
           await api("/api/auth/logout", { method: "POST", body: "{}" });
           window.location.href = "/dashboard";
           return;
         }
-        if (label.includes("overview")) await render("overview");
-        else if (label.includes("patient")) await render("patient list");
-        else if (label.includes("medication")) await render("medication schedule");
-        else if (label.includes("assessment")) await render("assessment results");
-        else if (label.includes("education")) await render("education content");
-        else if (label.includes("motivation")) await render("motivation messages");
-        else if (label.includes("settings")) await render("settings");
+        if (link.dataset.nurseView) await render(link.dataset.nurseView);
       });
     });
 

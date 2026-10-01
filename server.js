@@ -538,7 +538,12 @@ async function handleApi(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/motivations") {
     requireSession(req, res, sessionSecret);
     if (res.headersSent) return;
-    sendJson(res, 200, await store.listMotivations());
+    let items = await store.listMotivations();
+    if (url.searchParams.get("lang") === "en") {
+      const translated = await translateContent(items.map(item => item.message || ""), "en");
+      items = items.map((item, index) => ({ ...item, message: translated[index] }));
+    }
+    sendJson(res, 200, items);
     return;
   }
 
