@@ -6,7 +6,7 @@ const crypto = require("crypto");
 const { clearSessionCookie, createSessionCookie, readSession, requireSession } = require("./lib/auth");
 const { loadEnv } = require("./lib/env");
 const { exchangeCodeForProfile, googleAuthUrl } = require("./lib/google");
-const { askTbAssistant, DEFAULT_GEMINI_PRIMARY_MODEL, DEFAULT_GEMINI_FALLBACK_MODEL } = require("./lib/openai-chatbot");
+const { askTbAssistant, translateTexts, DEFAULT_GEMINI_PRIMARY_MODEL, DEFAULT_GEMINI_FALLBACK_MODEL } = require("./lib/openai-chatbot");
 const { isEmailConfigured, sendSmtpMail } = require("./lib/email");
 const { PostgresStore } = require("./lib/store");
 
@@ -89,6 +89,19 @@ function sendJson(res, status, payload, headers = {}) {
 
 function isConfigured(value, placeholder) {
   return Boolean(value) && value !== placeholder && !String(value).includes("your-");
+}
+
+// Content stored in Indonesian (education articles, daily motivation) is translated for patients who chose English.
+function translateContent(texts, language) {
+  if (language !== "en") return texts;
+  return translateTexts({
+    apiKey: config.GEMINI_API_KEY,
+    primaryModel: config.GEMINI_MODEL_PRIMARY,
+    fallbackModel: config.GEMINI_MODEL_FALLBACK,
+    texts,
+    target: language,
+    timeoutMs: config.GEMINI_TIMEOUT_MS
+  });
 }
 
 function redirect(res, location, headers = {}) {
@@ -501,7 +514,24 @@ async function handleApi(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/education") {
     requireSession(req, res, sessionSecret);
     if (res.headersSent) return;
-    sendJson(res, 200, await store.listEducation());
+    let items = await store.listEducation();
+    if (url.searchParams.get("lang") === "en") {
+      const fields = ["category", "title", "summary"];
+      const translated = await translateContent(items.flatMap(item => fields.map(field => item[field] || "")), "en");
+      items = items.map((item, index) => ({
+        ...item,
+        ...Object.fromEntries(fields.map((field, offset) => [field, translated[index * fields.length + offset]]))
+      }));
+    }
+    sendJson(res, 200, items);
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/patient/motivation") {
+    requireSession(req, res, sessionSecret);
+    if (res.headersSent) return;
+    const [motivation] = await translateContent([await store.getMotivation()], url.searchParams.get("lang"));
+    sendJson(res, 200, { motivation });
     return;
   }
 

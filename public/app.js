@@ -105,9 +105,22 @@
       "Tetap Semangat!": "Keep Going!",
       "Pastikan Anda sudah meminum dosis sesuai anjuran dokter.": "Make sure you have taken your dose as prescribed by your doctor.",
       "Privasi": "Privacy",
-      "Privacy Policy": "Privacy Policy",
-      "Contact Support": "Contact Support",
-      "Emergency Hotline": "Emergency Hotline"
+      "Kebijakan Privasi": "Privacy Policy",
+      "Hubungi Dukungan": "Contact Support",
+      "Hotline Darurat": "Emergency Hotline",
+      "© 2026 Sistem Kesehatan ASET-TB. Mendampingi perjalanan pemulihan Anda.": "© 2026 ASET-TB Healthcare System. Supporting your recovery journey.",
+      "Dashboard Pasien ASET-TB": "ASET-TB Patient Dashboard",
+      "Edukasi TB - ASET-TB": "TB Education - ASET-TB",
+      "Profil Pasien - ASET-TB": "Patient Profile - ASET-TB",
+      "Memuat...": "Loading...",
+      "Hari Jadwal Berjalan": "Scheduled Days So Far",
+      "Self-Efficacy Hari Ini": "Today's Self-Efficacy",
+      "Kepatuhan Database": "Recorded Adherence",
+      "Nilai Motivasi Hari Ini": "Today's Motivation Score",
+      "Pengaturan bahasa": "Language settings",
+      "Buka menu navigasi": "Open navigation menu",
+      "Tutup menu": "Close menu",
+      "Buka jadwal pengobatan": "Open medication schedule"
     }
   };
 
@@ -149,6 +162,12 @@
       const trailing = source.match(/\s*$/)?.[0] || "";
       node.nodeValue = `${leading}${translated}${trailing}`;
     });
+    root.querySelectorAll("[aria-label], [placeholder], [title]").forEach(element => {
+      ["aria-label", "placeholder", "title"].forEach(attribute => {
+        const translated = map[element.getAttribute(attribute)?.trim()];
+        if (translated) element.setAttribute(attribute, translated);
+      });
+    });
   }
 
   function mountLanguageSelector() {
@@ -187,7 +206,7 @@
 
   function initLanguage() {
     document.documentElement.lang = currentLanguage();
-    if (document.title) document.title = t(document.title);
+    if (document.title) document.title = languageMap()[document.title.trim()] || document.title;
     mountLanguageSelector();
     translateTextNodes();
   }
@@ -213,7 +232,7 @@
     });
     if (response.status === 401) {
       if (redirectOnAuth !== false) window.location.href = "/";
-      throw new Error("Silakan login terlebih dahulu");
+      throw new Error(t("Silakan login terlebih dahulu", "Please sign in first"));
     }
     if (!response.ok) throw new Error((await response.json()).error || "API error");
     return response.json();
@@ -273,7 +292,7 @@
       nextScheduleCard.classList.add("cursor-pointer", "hover:bg-primary/5", "transition-colors");
       nextScheduleCard.setAttribute("role", "button");
       nextScheduleCard.setAttribute("tabindex", "0");
-      nextScheduleCard.setAttribute("aria-label", "Buka jadwal pengobatan");
+      nextScheduleCard.setAttribute("aria-label", t("Buka jadwal pengobatan"));
       const openSchedule = () => go("/schedule");
       nextScheduleCard.addEventListener("click", openSchedule);
       nextScheduleCard.addEventListener("keydown", event => {
@@ -330,9 +349,28 @@
     if (node && replacement != null) node.textContent = replacement;
   }
 
+  const MEDICATION_FORMS_EN = { kapsul: "capsule", kaplet: "caplet", tablet: "tablet", sirup: "syrup", bungkus: "sachet", sachet: "sachet", tetes: "drops", sendok: "spoon" };
+
+  // Medication forms are typed by nurses in Indonesian ("2 Tablet", "1 Kapsul"); show them in English when English is selected.
+  function localizedMedicationForm(form) {
+    const value = String(form || "");
+    if (currentLanguage() !== "en") return value;
+    const amount = parseFloat(value.replace(",", "."));
+    return value.replace(/\b(kapsul|kaplet|tablet|sirup|bungkus|sachet|tetes|sendok)\b/gi, word => {
+      const english = MEDICATION_FORMS_EN[word.toLowerCase()];
+      const label = amount > 1 && !["syrup", "drops"].includes(english) ? `${english}s` : english;
+      return word[0] === word[0].toUpperCase() ? label[0].toUpperCase() + label.slice(1) : label;
+    });
+  }
+
+  function localizedPhase(phase) {
+    if (currentLanguage() !== "en") return phase;
+    return { intensif: "Intensive", lanjutan: "Continuation" }[String(phase || "").trim().toLowerCase()] || phase;
+  }
+
   function formatMedication(medication) {
     if (!medication) return t("Tidak ada jadwal", "No schedule");
-    const parts = [medication.name, medication.form ? `(${medication.form})` : ""].filter(Boolean);
+    const parts = [medication.name, medication.form ? `(${localizedMedicationForm(medication.form)})` : ""].filter(Boolean);
     return parts.join(" ");
   }
 
@@ -371,7 +409,7 @@
             <span class="material-symbols-outlined text-primary">medical_services</span>
             <h2 class="font-headline-sm text-primary">ASET-TB</h2>
           </div>
-          <button type="button" class="p-2 rounded-full hover:bg-surface-container" data-drawer-close aria-label="Tutup menu">
+          <button type="button" class="p-2 rounded-full hover:bg-surface-container" data-drawer-close aria-label="${t("Tutup menu")}">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
@@ -400,7 +438,7 @@
       if (nestedIcon === "menu" || directIcon === "menu") {
         button.setAttribute("data-patient-menu", "true");
         button.setAttribute("type", "button");
-        button.setAttribute("aria-label", "Buka menu navigasi");
+        button.setAttribute("aria-label", t("Buka menu navigasi"));
       }
     });
     ensurePatientDrawer();
@@ -498,10 +536,10 @@
   ];
 
   const motivationSurveyOptions = [
-    { label: "SS", value: 4, id: "Sangat setuju", en: "Strongly agree" },
-    { label: "S", value: 3, id: "Setuju", en: "Agree" },
-    { label: "TS", value: 2, id: "Tidak setuju", en: "Disagree" },
-    { label: "STS", value: 1, id: "Sangat tidak setuju", en: "Strongly disagree" }
+    { label: "SS", enLabel: "SA", value: 4, id: "Sangat setuju", en: "Strongly agree" },
+    { label: "S", enLabel: "A", value: 3, id: "Setuju", en: "Agree" },
+    { label: "TS", enLabel: "D", value: 2, id: "Tidak setuju", en: "Disagree" },
+    { label: "STS", enLabel: "SD", value: 1, id: "Sangat tidak setuju", en: "Strongly disagree" }
   ];
 
   function motivationCategory(score) {
@@ -524,7 +562,7 @@
           ${motivationSurveyOptions.map(option => `
             <label class="text-center rounded-lg border border-outline-variant/60 bg-surface-container-lowest py-2 px-1 cursor-pointer hover:bg-primary/5">
               <input class="sr-only peer" type="radio" name="motivationAnswer${index}" value="${option.value}" ${answers[index] === option.value ? "checked" : ""} required>
-              <span class="block peer-checked:text-primary peer-checked:font-bold">${option.label}</span>
+              <span class="block peer-checked:text-primary peer-checked:font-bold">${t(option.label, option.enLabel)}</span>
               <span class="block text-[11px] text-on-surface-variant leading-tight">${t(option.id, option.en)}</span>
             </label>`).join("")}
         </div>
@@ -543,7 +581,7 @@
           </div>
         </div>
         <div class="grid grid-cols-4 gap-xs rounded-lg bg-surface-container-low px-3 py-2 text-xs text-on-surface-variant text-center">
-          ${motivationSurveyOptions.map(option => `<span><b>${option.label}</b><br>${t(option.id, option.en)}</span>`).join("")}
+          ${motivationSurveyOptions.map(option => `<span><b>${t(option.label, option.enLabel)}</b><br>${t(option.id, option.en)}</span>`).join("")}
         </div>
         <div class="space-y-sm">${questionMarkup}</div>
         <button class="w-full h-10 bg-primary text-on-primary rounded-lg font-button-text active:scale-[0.98] transition-transform" type="submit">${submitted ? "Perbarui Survei Motivasi" : "Simpan Survei Motivasi"}</button>
@@ -628,7 +666,7 @@
           <p class="text-on-surface-variant text-sm">Skor survei hari ini menjadi dasar pesan dukungan yang sesuai.</p>
         </div>
       </div>
-      <blockquote class="rounded-lg bg-primary-fixed/50 border border-primary-fixed-dim p-sm text-on-surface font-label-md italic">"${data.motivation}"</blockquote>
+      <blockquote class="rounded-lg bg-primary-fixed/50 border border-primary-fixed-dim p-sm text-on-surface font-label-md italic" data-daily-motivation>"${data.motivation}"</blockquote>
       ${motivationScoreFormMarkup(data)}
       ${dailyMotivationMessagesMarkup(data)}`;
 
@@ -638,7 +676,7 @@
       const formData = new FormData(form);
       const answers = motivationSurveyQuestions.map((_, index) => Number(formData.get(`motivationAnswer${index}`)));
       if (answers.some(value => !Number.isFinite(value))) {
-        showToast("Mohon jawab semua pertanyaan survei motivasi harian.");
+        showToast(t("Mohon jawab semua pertanyaan survei motivasi harian."));
         return;
       }
       try {
@@ -646,14 +684,14 @@
           method: "POST",
           body: JSON.stringify({ answers })
         });
-        form.querySelector("button").textContent = "Survei Motivasi Tersimpan";
+        form.querySelector("button").textContent = t("Survei Motivasi Tersimpan");
         const current = document.getElementById("motivation-score-current");
         if (current) current.textContent = `${result.motivationScore.score}%`;
         const category = document.getElementById("motivation-score-category");
         if (category) category.textContent = motivationCategory(result.motivationScore.score);
         const messages = document.getElementById("daily-motivation-messages");
         if (messages) messages.outerHTML = dailyMotivationMessagesMarkup({ ...data, motivationScoreToday: result.motivationScore });
-        showToast(`Survei motivasi harian tersimpan: ${result.motivationScore.score}%.`);
+        showToast(tf("Survei motivasi harian tersimpan: {score}%.", "Daily motivation survey saved: {score}%.", { score: result.motivationScore.score }));
       } catch (error) {
         showToast(error.message);
       }
@@ -675,19 +713,25 @@
     button.setAttribute("href", "/api/auth/google/start");
     const status = await api("/api/config/status");
     if (!status.googleOAuth) {
-      showToast("Google OAuth belum lengkap. Periksa GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, dan redirect URI di .env.");
+      showToast(t(
+        "Google OAuth belum lengkap. Periksa GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, dan redirect URI di .env.",
+        "Google OAuth is not fully configured. Check GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and the redirect URI in .env."
+      ));
       button.addEventListener("click", event => {
         event.preventDefault();
-        showToast("Lengkapi konfigurasi Google OAuth dulu sebelum login.");
+        showToast(t("Lengkapi konfigurasi Google OAuth dulu sebelum login.", "Complete the Google OAuth configuration before signing in."));
       });
     }
     if (!status.gemini && !status.openAi) {
-      showToast("Chatbot akan memakai mode fallback lokal sampai GEMINI_API_KEY atau OPENAI_API_KEY diisi.");
+      showToast(t(
+        "Chatbot akan memakai mode fallback lokal sampai GEMINI_API_KEY atau OPENAI_API_KEY diisi.",
+        "The chatbot will use local fallback answers until GEMINI_API_KEY or OPENAI_API_KEY is set."
+      ));
     }
     const me = await api("/api/me", { redirectOnAuth: false });
     if (me.authenticated && me.patient) {
       const textNode = button.querySelector("span:last-child") || button;
-      textNode.textContent = "Lanjut ke Dashboard";
+      textNode.textContent = t("Lanjut ke Dashboard");
       button.setAttribute("href", "/dashboard");
       button.addEventListener("click", event => {
         event.preventDefault();
@@ -704,10 +748,18 @@
 
   }
 
+  // The daily motivation is stored in Indonesian; in English the server returns a translated copy (or the original if translation failed).
+  async function showTranslatedDailyMotivation(original, nodes) {
+    if (currentLanguage() !== "en" || !nodes.length) return;
+    const { motivation } = await api("/api/patient/motivation?lang=en");
+    if (motivation && motivation !== original) nodes.forEach(node => { node.textContent = `"${motivation}"`; });
+  }
+
   async function initDashboard() {
     const data = await api("/api/patient/dashboard");
     updatePatientHeader(data.patient);
-    setTextByCurrentText('"Setiap obat yang diminum hari ini adalah langkah menuju kesembuhan"', currentLanguage() === "en" ? '"Every dose you take today is a step toward recovery."' : `"${data.motivation}"`);
+    const heroQuote = textIncludes('"Setiap obat yang diminum hari ini adalah langkah menuju kesembuhan"');
+    if (heroQuote) heroQuote.textContent = currentLanguage() === "en" ? '"Every dose you take today is a step toward recovery."' : `"${data.motivation}"`;
 
     const adherence = data.adherence || { score: data.patient.adherenceScore || 0, confirmedDays: 0, treatmentDays: data.patient.treatmentDay || 1 };
     const adherenceCard = textIncludes("Kepatuhan Pengobatan")?.closest(".rounded-xl");
@@ -723,6 +775,7 @@
     setTextByCurrentText("Rifampicin (1 Kaplet)", next.label);
     setTextByCurrentText("Pengobatan TB membutuhkan kedisiplinan. Anda sudah menyelesaikan 45 hari dari program 180 hari.", data.progressText);
     renderHomeDailyCard(data);
+    showTranslatedDailyMotivation(data.motivation, [heroQuote, document.querySelector("[data-daily-motivation]")].filter(Boolean)).catch(() => {});
 
     const chatAccess = document.querySelector("[data-ai-assistant-card]") || textIncludes("Tanya Asisten")?.closest("section");
     if (chatAccess) {
@@ -747,21 +800,36 @@
   async function initEducation() {
     const list = document.getElementById("education-list");
     if (!list) return;
+    function renderItems(items) {
+      list.innerHTML = "";
+      items.forEach(item => {
+        const card = document.createElement("article");
+        card.className = "bg-white rounded-xl border border-[#c1c6d7]/40 p-5 shadow-sm";
+        card.innerHTML = `
+          <div class="inline-flex px-3 py-1 rounded-full bg-[#67fcc6]/30 text-[#007354] text-sm font-bold mb-3"></div>
+          <h2 class="font-[Manrope] text-xl font-bold mb-2"></h2>
+          <p class="text-[#414754] leading-relaxed"></p>
+        `;
+        card.querySelector("div").textContent = item.category;
+        card.querySelector("h2").textContent = item.title;
+        card.querySelector("p").textContent = item.summary;
+        list.appendChild(card);
+      });
+    }
+
     const items = await api("/api/education");
-    list.innerHTML = "";
-    items.forEach(item => {
-      const card = document.createElement("article");
-      card.className = "bg-white rounded-xl border border-[#c1c6d7]/40 p-5 shadow-sm";
-      card.innerHTML = `
-        <div class="inline-flex px-3 py-1 rounded-full bg-[#67fcc6]/30 text-[#007354] text-sm font-bold mb-3"></div>
-        <h2 class="font-[Manrope] text-xl font-bold mb-2"></h2>
-        <p class="text-[#414754] leading-relaxed"></p>
-      `;
-      card.querySelector("div").textContent = item.category;
-      card.querySelector("h2").textContent = item.title;
-      card.querySelector("p").textContent = item.summary;
-      list.appendChild(card);
-    });
+    renderItems(items);
+    // Articles are written in Indonesian; show the original at once, then swap in the English translation.
+    if (currentLanguage() === "en" && items.length) {
+      api("/api/education?lang=en").then(translated => {
+        if (JSON.stringify(translated) === JSON.stringify(items)) return;
+        renderItems(translated);
+        const note = document.createElement("p");
+        note.className = "text-sm text-[#414754]";
+        note.textContent = "Articles are translated automatically.";
+        list.prepend(note);
+      }).catch(() => {});
+    }
   }
 
   async function initProfile() {
@@ -784,7 +852,7 @@
     name.textContent = patient.name || user.name || "-";
     document.getElementById("profile-email").textContent = user.email || patient.googleEmail || "-";
     document.getElementById("profile-mrn").textContent = patient.medicalRecordNumber || "-";
-    document.getElementById("profile-phase").textContent = patient.phase || "-";
+    document.getElementById("profile-phase").textContent = localizedPhase(patient.phase) || "-";
     document.getElementById("profile-day").textContent = tf("{confirmed}/{total} hari dikonfirmasi", "{confirmed}/{total} days confirmed", { confirmed: adherence.confirmedDays || 0, total: adherence.treatmentDays || 0 });
     document.getElementById("profile-self").textContent = selfToday.submittedToday ? `${selfToday.score}%` : t("Belum diisi hari ini");
     const adherenceNode = document.getElementById("profile-adherence");
@@ -824,21 +892,21 @@
 
   async function captureMedicationVideo() {
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-      throw new Error("Browser belum mendukung rekaman video dari kamera.");
+      throw new Error(t("Browser belum mendukung rekaman video dari kamera.", "This browser cannot record video from the camera."));
     }
 
     const overlay = document.createElement("div");
     overlay.className = "fixed inset-0 z-[200] bg-black/70 flex items-center justify-center p-4";
     overlay.innerHTML = `
       <div class="bg-surface-container-lowest rounded-xl p-md w-full max-w-xl shadow-2xl space-y-sm">
-        <h3 class="font-headline-sm text-headline-sm text-on-surface">Rekam Video Minum Obat</h3>
-        <p class="text-on-surface-variant">Arahkan kamera saat pasien meminum obat. Rekam video singkat sebagai bukti konfirmasi.</p>
+        <h3 class="font-headline-sm text-headline-sm text-on-surface">${t("Rekam Video Minum Obat", "Record Medication Video")}</h3>
+        <p class="text-on-surface-variant">${t("Arahkan kamera saat pasien meminum obat. Rekam video singkat sebagai bukti konfirmasi.", "Point the camera at the patient while they take the medicine. Record a short video as confirmation.")}</p>
         <video class="w-full rounded-lg bg-black aspect-video" autoplay muted playsinline></video>
-        <p class="text-sm text-on-surface-variant" data-recording-status>Tekan Mulai Rekam saat siap.</p>
+        <p class="text-sm text-on-surface-variant" data-recording-status>${t("Tekan Mulai Rekam saat siap.", "Press Start Recording when you are ready.")}</p>
         <div class="flex flex-wrap gap-sm justify-end">
-          <button type="button" class="px-4 py-2 rounded-lg border border-outline-variant" data-video-cancel>Batal</button>
-          <button type="button" class="px-4 py-2 rounded-lg bg-primary text-on-primary" data-video-start>Mulai Rekam</button>
-          <button type="button" class="hidden px-4 py-2 rounded-lg bg-secondary text-on-secondary" data-video-stop>Selesai & Konfirmasi</button>
+          <button type="button" class="px-4 py-2 rounded-lg border border-outline-variant" data-video-cancel>${t("Batal", "Cancel")}</button>
+          <button type="button" class="px-4 py-2 rounded-lg bg-primary text-on-primary" data-video-start>${t("Mulai Rekam", "Start Recording")}</button>
+          <button type="button" class="hidden px-4 py-2 rounded-lg bg-secondary text-on-secondary" data-video-stop>${t("Selesai & Konfirmasi", "Finish & Confirm")}</button>
         </div>
       </div>`;
     document.body.appendChild(overlay);
@@ -862,7 +930,7 @@
       }
       cancelButton.addEventListener("click", () => {
         cleanup();
-        reject(new Error("Konfirmasi video dibatalkan."));
+        reject(new Error(t("Konfirmasi video dibatalkan.", "Video confirmation cancelled.")));
       });
       startButton.addEventListener("click", () => {
         chunks.length = 0;
@@ -872,13 +940,13 @@
         recorder.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
         recorder.onerror = event => {
           cleanup();
-          reject(new Error(event.error?.message || "Gagal merekam video konfirmasi."));
+          reject(new Error(event.error?.message || t("Gagal merekam video konfirmasi.", "Could not record the confirmation video.")));
         };
         recorder.onstop = async () => {
           try {
-            if (!chunks.length) throw new Error("Video konfirmasi kosong. Rekam minimal beberapa detik.");
+            if (!chunks.length) throw new Error(t("Video konfirmasi kosong. Rekam minimal beberapa detik.", "The confirmation video is empty. Record for at least a few seconds."));
             const blob = new Blob(chunks, { type: recorder.mimeType || supportedType || "video/webm" });
-            if (!blob.size) throw new Error("Video konfirmasi kosong. Rekam minimal beberapa detik.");
+            if (!blob.size) throw new Error(t("Video konfirmasi kosong. Rekam minimal beberapa detik.", "The confirmation video is empty. Record for at least a few seconds."));
             const videoData = await blobToDataUrl(blob);
             cleanup();
             resolve({ videoData, videoMimeType: blob.type || "video/webm" });
@@ -888,13 +956,13 @@
           }
         };
         recorder.start(1000);
-        status.textContent = "Merekam... maksimal 15 detik.";
+        status.textContent = t("Merekam... maksimal 15 detik.", "Recording... up to 15 seconds.");
         startButton.classList.add("hidden");
         stopButton.classList.remove("hidden");
         timeout = setTimeout(() => recorder?.state === "recording" && recorder.stop(), 15000);
       });
       stopButton.addEventListener("click", () => {
-        status.textContent = "Menyimpan video dan konfirmasi...";
+        status.textContent = t("Menyimpan video dan konfirmasi...", "Saving the video and confirmation...");
         stopButton.disabled = true;
         if (recorder?.state === "recording") recorder.stop();
       });
@@ -965,7 +1033,7 @@
             </div>
             <div>
               <h4 class="font-headline-sm text-on-surface">${med.name}</h4>
-              <p class="text-on-surface-variant font-body-md">${med.dose} • ${med.form}</p>
+              <p class="text-on-surface-variant font-body-md">${med.dose} • ${localizedMedicationForm(med.form)}</p>
               <p class="text-on-surface-variant text-sm">${formatDateId(med.takenDate)}</p>
               <div class="flex items-center gap-xs mt-1 text-primary font-semibold">
                 <span class="material-symbols-outlined text-[18px]">schedule</span>
@@ -983,13 +1051,26 @@
   async function initSchedule() {
     const calendarSection = textIncludes("Jadwal Pengobatan")?.closest("section");
     const listSection = textIncludes("Obat Hari Ini")?.closest("section");
+    // The page ships with a placeholder sentence ("45 dari 180 hari"); replace it with the patient's real progress.
+    const progressNote = textIncludes("Pengobatan TB membutuhkan kedisiplinan");
     let dates = await api("/api/medication-dates");
     let selectedDate = new URLSearchParams(window.location.search).get("date") || nearestScheduledDate(dates);
+
+    function renderScheduleProgress() {
+      if (!progressNote) return;
+      const due = dates.filter(item => item.date <= isoTodayJakarta());
+      progressNote.textContent = tf(
+        "Pengobatan TB membutuhkan kedisiplinan. Konfirmasi tercatat pada {confirmed} dari {due} hari jadwal yang sudah berjalan.",
+        "TB treatment takes discipline. You have confirmed {confirmed} of {due} scheduled days so far.",
+        { confirmed: due.filter(item => item.confirmed > 0).length, due: due.length }
+      );
+    }
 
     async function loadDate(date) {
       selectedDate = date;
       const meds = await api(`/api/medications?date=${encodeURIComponent(selectedDate)}`);
       dates = await api("/api/medication-dates");
+      renderScheduleProgress();
       if (calendarSection) renderScheduleCalendar(calendarSection, dates, selectedDate);
       if (listSection) {
         listSection.innerHTML = `
@@ -1030,7 +1111,11 @@
               method: "POST",
               body: JSON.stringify(evidence)
             });
-            showToast(`Konfirmasi video ${updated.name} berhasil dicatat pukul ${updated.confirmedAt}. Status: ${statusLabel(updated.status)}.`);
+            showToast(tf(
+              "Konfirmasi video {name} berhasil dicatat pukul {time}. Status: {status}.",
+              "Video confirmation for {name} recorded at {time}. Status: {status}.",
+              { name: updated.name, time: updated.confirmedAt, status: statusLabel(updated.status) }
+            ));
             await loadDate(selectedDate);
           } catch (error) {
             showToast(error.message);
@@ -1076,6 +1161,7 @@
     const textarea = document.querySelector("textarea");
     const sendButton = document.querySelector(".fixed button.bg-primary");
     if (!chatList || !textarea || !sendButton) return;
+    chatList.innerHTML = "";
 
     textarea.placeholder = t("Ketik pesan Anda di sini...", "Type your message here...");
 
@@ -1614,7 +1700,7 @@
       .then(() => translateTextNodes())
       .catch(error => {
         console.error(`${name} gagal:`, error);
-        showToast(`${name} belum bisa dimuat: ${error.message}`);
+        showToast(tf("{name} belum bisa dimuat: {error}", "{name} could not be loaded: {error}", { name, error: error.message }));
       });
   }
 
