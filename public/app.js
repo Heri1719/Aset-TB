@@ -1562,6 +1562,13 @@
         link.classList.toggle("bg-primary-container", active);
         link.classList.toggle("text-on-primary-container", active);
       });
+      document.querySelectorAll("[data-nurse-tabs] a").forEach(tab => {
+        const active = tab.dataset.nurseView === view;
+        tab.classList.toggle("bg-secondary-container", active);
+        tab.classList.toggle("text-on-secondary-container", active);
+        tab.classList.toggle("text-on-surface-variant", !active);
+        tab.querySelector(".material-symbols-outlined").style.fontVariationSettings = active ? "'FILL' 1" : "";
+      });
 
       if (view === "overview") {
         const updatedAt = new Date(state.data.updatedAt).toLocaleString(currentLanguage() === "en" ? "en-US" : "id-ID", { timeZone: "Asia/Jakarta" });
@@ -1788,9 +1795,40 @@
       });
     }
 
-    document.querySelectorAll("aside nav a, aside .mt-auto a").forEach(link => {
+    // Below md the sidebar is hidden; the header menu button shows it as an overlay drawer.
+    const sidebar = document.getElementById("nurse-sidebar");
+    const backdrop = document.querySelector("[data-nurse-menu-backdrop]");
+    const menuButton = document.querySelector("[data-nurse-menu]");
+    const main = document.querySelector("main");
+    let menuOpen = false;
+
+    function setMenuOpen(open) {
+      if (open === menuOpen || !sidebar || !menuButton) return;
+      menuOpen = open;
+      sidebar.classList.toggle("hidden", !open);
+      backdrop?.classList.toggle("hidden", !open);
+      document.body.classList.toggle("overflow-hidden", open);
+      if (main) main.inert = open;
+      menuButton.setAttribute("aria-expanded", String(open));
+      if (open) sidebar.querySelector("[data-nurse-menu-close]")?.focus();
+      else menuButton.focus();
+    }
+
+    menuButton?.addEventListener("click", () => setMenuOpen(true));
+    document.querySelectorAll("[data-nurse-menu-close], [data-nurse-menu-backdrop]").forEach(element => {
+      element.addEventListener("click", () => setMenuOpen(false));
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") setMenuOpen(false);
+    });
+    // Widening past md shows the regular sidebar; close the drawer so the page is not left scroll-locked.
+    window.matchMedia("(min-width: 768px)").addEventListener("change", () => setMenuOpen(false));
+
+    // Sidebar links and bottom-nav tabs take their view from data-nurse-view, not from the translated label.
+    document.querySelectorAll("[data-nurse-view], [data-nurse-logout]").forEach(link => {
       link.addEventListener("click", async event => {
         event.preventDefault();
+        setMenuOpen(false);
         if (link.hasAttribute("data-nurse-logout")) {
           await api("/api/auth/logout", { method: "POST", body: "{}" });
           window.location.href = "/dashboard";
