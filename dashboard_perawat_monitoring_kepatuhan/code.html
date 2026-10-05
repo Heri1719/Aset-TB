@@ -120,14 +120,18 @@
   </style>
 </head>
 <body class="font-body-md text-on-surface">
-<!-- Sidebar Navigation -->
-<aside class="fixed inset-y-0 left-0 z-[60] flex flex-col p-md bg-surface-bright shadow-xl h-full w-80 rounded-r-xl transition-transform duration-300 ease-in-out hidden md:flex">
+<!-- Sidebar Navigation (an overlay drawer below md, opened from the header menu button) -->
+<div class="fixed inset-0 z-[55] bg-black/40 hidden md:hidden" data-nurse-menu-backdrop></div>
+<aside id="nurse-sidebar" class="fixed inset-y-0 left-0 z-[60] flex flex-col p-md bg-surface-bright shadow-xl h-full w-80 max-w-[85vw] rounded-r-xl transition-transform duration-300 ease-in-out hidden md:flex">
 <div class="mb-lg">
 <div class="flex items-center gap-sm mb-md">
 <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-on-primary">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">medical_services</span>
 </div>
 <h1 class="font-headline-sm text-headline-sm text-primary">ASET-TB</h1>
+<button type="button" class="md:hidden ml-auto p-2 rounded-full text-on-surface-variant hover:bg-surface-variant" data-nurse-menu-close aria-label="Close menu">
+<span class="material-symbols-outlined">close</span>
+</button>
 </div>
 <div class="flex items-center gap-sm p-sm bg-surface-container-low rounded-lg mb-lg">
 <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
@@ -181,7 +185,7 @@
 <!-- Top Bar -->
 <header class="sticky top-0 z-50 flex justify-between items-center px-md h-20 w-full bg-surface-container-low shadow-sm">
 <div class="flex items-center gap-md">
-<button class="md:hidden p-2 text-primary">
+<button type="button" class="md:hidden p-2 text-primary" data-nurse-menu aria-controls="nurse-sidebar" aria-expanded="false" aria-label="Open navigation menu">
 <span class="material-symbols-outlined">menu</span>
 </button>
 <h2 class="font-headline-md text-headline-md font-bold text-primary">Dashboard Perawat</h2>
@@ -510,22 +514,14 @@
 </div>
 </div>
 <!-- Mobile Navigation Bar -->
-<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 bg-surface-container-lowest shadow-lg rounded-t-xl">
-<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1.5 transition-all active:scale-90 duration-200 ease-out" href="#">
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-safe h-20 bg-surface-container-lowest shadow-lg rounded-t-xl" data-nurse-tabs>
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1.5 transition-all active:scale-90 duration-200 ease-out" href="#" data-nurse-view="overview">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
 <span class="font-label-md text-label-md">Home</span>
 </a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 transition-all active:scale-90 duration-200 ease-out" href="#">
+<a class="flex flex-col items-center justify-center text-on-surface-variant rounded-full px-4 py-1.5 transition-all active:scale-90 duration-200 ease-out" href="#" data-nurse-view="patient list">
 <span class="material-symbols-outlined">group</span>
 <span class="font-label-md text-label-md">Patients</span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 transition-all active:scale-90 duration-200 ease-out" href="#">
-<span class="material-symbols-outlined">notifications</span>
-<span class="font-label-md text-label-md">Alerts</span>
-</a>
-<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1.5 transition-all active:scale-90 duration-200 ease-out" href="#">
-<span class="material-symbols-outlined">person</span>
-<span class="font-label-md text-label-md">Profile</span>
 </a>
 </nav>
 <!-- Footer -->
@@ -538,5 +534,5 @@
 </div>
 </footer>
 </main>
-<script src="/public/app.js?v=20261001-nurse-language"></script>
+<script src="/public/app.js?v=20261001-nurse-mobile-nav"></script>
 </body></html>
